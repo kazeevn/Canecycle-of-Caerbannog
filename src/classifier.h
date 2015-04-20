@@ -20,9 +20,9 @@ public:
       std::ofstream log);
 
   void fit(const string& file_name);
-  const float get_average_progressive_loss();
-  const float get_average_holdout_loss();
-  boost::numeric::ublas::vector<float> predict(const Item& item);
+  const double get_average_progressive_loss();
+  const double get_average_holdout_loss();
+  boost::numeric::ublas::vector<double> predict(const Item& item);
   void predict(const string& input_file_name, const string& output_file_name);
-}
+};
 #endif  // CLASSIFIER_H_
