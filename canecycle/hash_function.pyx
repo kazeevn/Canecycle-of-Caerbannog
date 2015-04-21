@@ -5,11 +5,11 @@ MAX_HASH_SIZE = 63
 
 cdef class HashFunction:
     cdef unsigned long hash_size
-    def __init__(self, hash_size):
+    def __cinit__(self, hash_size):
         if hash_size > MAX_HASH_SIZE:
             raise ValueError(
-                "We appreciate your hardware, but the maximum supported hash size is %d." %
-                MAX_HASH_SIZE)
+                "We appreciate your hardware, but the maximum "
+                "supported hash size is %d." % MAX_HASH_SIZE)
         if hash_size < 0:
             raise ValueError("Hash size should be positive.")
         self.hash_size = 2**hash_size
