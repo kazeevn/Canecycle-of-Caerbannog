@@ -1,6 +1,7 @@
 import unittest
-import hash_function
 import numpy
+
+import canecycle.hash_function
 
 class TestHashFunction(unittest.TestCase):
 
