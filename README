@@ -1,1 +1,5 @@
-Nothing to run for now.
+Installation
+sudo python setup.py install
+
+Tests
+nosetests .
