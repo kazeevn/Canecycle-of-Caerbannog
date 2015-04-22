@@ -4,8 +4,6 @@ import ctypes
 cdef unsigned int MAX_HASH_SIZE = 63
 
 cdef class HashFunction:
-    cdef readonly unsigned long hash_size
-
     def __cinit__(self, hash_size):
         if hash_size > MAX_HASH_SIZE:
             raise ValueError(
@@ -15,5 +13,5 @@ cdef class HashFunction:
             raise ValueError("Hash size should be positive.")
         self.hash_size = 2**hash_size
     
-    cpdef unsigned long hash(self, string):
+    cpdef unsigned long hash(self, str string):
         return spooky.hash64(string) % self.hash_size
