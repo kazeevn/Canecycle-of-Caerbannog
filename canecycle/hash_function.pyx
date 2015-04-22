@@ -4,7 +4,7 @@ import ctypes
 MAX_HASH_SIZE = 63
 
 cdef class HashFunction:
-    cdef unsigned long hash_size
+    cdef public unsigned long hash_size
     def __cinit__(self, hash_size):
         if hash_size > MAX_HASH_SIZE:
             raise ValueError(
