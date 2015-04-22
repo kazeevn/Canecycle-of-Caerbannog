@@ -20,12 +20,21 @@ class TestParser(unittest.TestCase):
         for header_type in header[38:]:
             self.assertEqual(header_type, canecycle.parser.ValueType_numerical)
 
-    def test_restart(self):
+    def test_parse(self):
         format_ = read_shad_lsml_header(self.test_file)
         hash_function = HashFunction(20)
         parser = Parser(hash_function, format_)
         input_file = open(self.test_file)
         # Skipt header
         input_file.next()
+        line = input_file.next()
+        print line
+        item = parser.parse(line)
+        self.assertEqual(item.label, -1)
+        self.assertEqual(item.weight, 1)
+        self.assertEqual(item.features[1234, 0], 0)
+        self.assertEqual(item.features[1, 0], 0)
+        self.assertEqual(item.features[107535, 0], 1382)
+        self.assertEqual(item.features[641047, 0], 1)
         for line in input_file:
             item = parser.parse(line)

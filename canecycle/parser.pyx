@@ -8,6 +8,7 @@ def name_iterator():
     i = 0
     while True:
         yield "%d_" % i
+        i += 1
 
 #TODO(kazeevn) switch to proper Cython
 ValueType_label = 0
@@ -55,7 +56,7 @@ cdef class Parser:
             if readout == '':
                 continue
             if item_format == ValueType_label:
-                item.label = int(readout)
+                item.label = int(readout) * 2 - 1
             elif item_format == ValueType_categorical:
                 item.features[self.hash_function.hash(
                     column_name + readout)] = 1
