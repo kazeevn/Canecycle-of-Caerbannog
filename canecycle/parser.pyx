@@ -14,10 +14,13 @@ def name_iterator():
 ValueType_label = 0
 ValueType_categorical = 1
 ValueType_numerical = 2
+ValueType_skip = 3
 
 def transform_header(header_item):
     if header_item == 'CLICK':
         return ValueType_label
+    elif header_item == 'ID':
+        return ValueType_skip
     # It should be CAT, but the header contains typos
     elif header_item.startswith('CA') or header_item.startswith('AT'):
         return ValueType_categorical
@@ -63,7 +66,7 @@ cdef class Parser:
             elif item_format == ValueType_numerical:
                 item.features[self.hash_function.hash(column_name)] = \
                     float(readout)
-            else:
+            elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
         return item
     
