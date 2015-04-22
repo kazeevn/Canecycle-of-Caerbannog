@@ -6,7 +6,7 @@ def name_iterator():
     while True:
         yield "%d_" % i
 
-cpdef string transform_header(header_item):
+cdef str transform_header(header_item):
     if header_item == 'CLICK':
         return 'label'
     elif header_item.startswith('CAT'):
@@ -16,35 +16,42 @@ cpdef string transform_header(header_item):
     else:
         raise ValueError("Unknown item in header %s" % header_item)
 
-def read_shad_lsml_header(filename):
+cdef list read_shad_lsml_header(filename):
+    global transform_header
     input_file = open(filename)
-    header = input.readline.split(',')
-    result =  map(transform_header, header)
+    header = input.readline().split(',')
+    # candy cane!
+    result = ['label', 'categorial','numerical']
+    #result = map(transform_header, header)
     input_file.close()
     return result
 
 
-cydef class Reader:
+cdef class Reader(object):
     def __cinit__(self, hash_function):
         self.hash_function = hash_function
         
-    def open(filename, format_, skip):
+    def open(self, filename, format_, skip):
         self.filename = filename
         self.format = format_
         self.file = open(self.filename)
         self.skip = skip
         self.restart()
         
-    def restart():
+    cdef void restart(self):
         self.file.close()
         self.file = open(self.filename)
         for _ in xrange(self.skip):
             self.file.next()
     
-    def __next__():
+    cdef unsigned int hash_size(self):
+        return self.hash_function.hash_size
+    
+    def __next__(self):
         # StopIteration will rise through stack
+        #TODO: init cycle variables
         line = file.next().split(',')
-        item = Item(hash_function.hash_size)
+        item = Item(self.hash_function.hash_size)
         column_namer = name_iterator()
         for item_format, readout, column_name in \
             izip(self.format, line, column_namer):
