@@ -1,10 +1,11 @@
 import spooky
 import ctypes
 
-MAX_HASH_SIZE = 63
+cdef unsigned int MAX_HASH_SIZE = 63
 
 cdef class HashFunction:
     cdef readonly unsigned long hash_size
+
     def __cinit__(self, hash_size):
         if hash_size > MAX_HASH_SIZE:
             raise ValueError(

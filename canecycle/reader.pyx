@@ -41,6 +41,7 @@ class Reader:
         self.skip = skip
         self.restart()
         
+
     def restart(self):
         self.file.close()
         self.file = open(self.filename)
