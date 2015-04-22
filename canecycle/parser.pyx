@@ -66,5 +66,8 @@ cdef class Parser:
             else:
                 raise ValueError("Invalid format %s" % item_format)
         return item
+    
+    cpdef unsigned int get_features_count(self):
+        return self.hash_function.hash_size
                 
         

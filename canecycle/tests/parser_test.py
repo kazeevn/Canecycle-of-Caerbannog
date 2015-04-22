@@ -38,3 +38,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual(item.features[641047, 0], 1)
         for line in input_file:
             item = parser.parse(line)
+
+    def test_features_count(self):
+        hash_function = HashFunction(20)
+        parser = Parser(hash_function, [])
+        self.assertEqual(parser.get_features_count(), 2**20)
+        
