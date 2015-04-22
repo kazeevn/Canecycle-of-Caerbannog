@@ -1,5 +1,10 @@
+Required python packages
+scipy
+spooky
+
 Installation
 sudo python setup.py install
 
 Tests
+sudo python setup.py build_ext --inplace
 nosetests .
