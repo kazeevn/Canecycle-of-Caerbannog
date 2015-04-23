@@ -2,21 +2,22 @@ from __future__ import division
 
 import numpy as np
 cimport numpy as np
+from cpython cimport bool as c_bool
 
 from canecycle.item cimport Item
 from canecycle.reader cimport Reader
+from canecycle.weight_manager cimport WeightManager
 #TODO(shiryaev) import->cimport
-from canecycle.weight_manager import WeightManager
 from canecycle.optimizer import Optimizer
 from canecycle.loss_function import LossFunction
 
 #TODO(shiryaev) save/load
 cdef class Classifier(object):
-    cdef weight_manager
+    cdef WeightManager weight_manager
     cdef optimizer
     cdef loss_function
     
-    cdef store_progressive_validation
+    cdef c_bool store_progressive_validation
     cdef unsigned int pass_number
     cdef unsigned long items_processed
     cdef unsigned long validation_index
@@ -28,11 +29,11 @@ cdef class Classifier(object):
     cdef float average_training_loss # optimizer loss
     cdef float holdout_loss # lossfunc loss
     
-    cdef display
+    cdef c_bool display
     
-    def __cinit__(self, optimizer, loss_function, weight_manager,
-            store_progressive_validation, int holdout, int pass_number,
-            display=False):
+    def __cinit__(self, optimizer, loss_function, WeightManager weight_manager,
+            c_bool store_progressive_validation, int holdout, int pass_number,
+            c_bool display=False):
         
         if pass_number < 0:
             raise ValueError("Negative number of passes.")
