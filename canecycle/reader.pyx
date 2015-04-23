@@ -1,4 +1,3 @@
-# cython: profile=True
 from canecycle.source import NotInitialized
 from canecycle.parser import read_shad_lsml_header
 from canecycle.hash_function cimport HashFunction
