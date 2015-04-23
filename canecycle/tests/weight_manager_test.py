@@ -1,4 +1,5 @@
-#cython: cdivision=True
+#cython: cdivision=False
+from __future__ import division
 
 import unittest
 import os.path
@@ -33,4 +34,4 @@ class TestWeightManager(unittest.TestCase):
     
     def test_weight_increment_three(self):
         weight_manager = WeightManager(100, 50) # p=0.5, n=200
-        self.assertEqual(weight_manager.get_weight(-1, 1), 100/101)
+        self.assertAlmostEqual(weight_manager.get_weight(-1, 1), 100/101)
