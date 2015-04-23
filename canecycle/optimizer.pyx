@@ -31,15 +31,13 @@ cdef class Optimizer(object):
         self.loss_function = loss_function
 
     cpdef object step(self, item, unsigned int step_number, weights):
-        cdef int index, element_index, label
+        cdef int index, element_index
         cdef double step_size
         cdef np.ndarray[cINT32, ndim=1] col
         cdef np.ndarray[cDOUBLE, ndim=1] data
-        cdef np.ndarray[cDOUBLE, ndim=1] gradient
-        features = item.features
-        label = item.label
+        cdef object gradient
         step_size = self.stepSize * self.scaleDown ** step_number
-        gradient = self.loss_function.get_gradient(features, label)
+        gradient = self.loss_function.get_gradient(weights, item)
         newStep = gradient * step_size
         col = newStep.col
         data = newStep.data

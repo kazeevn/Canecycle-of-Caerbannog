@@ -7,5 +7,4 @@ ctypedef numpy.int32_t cINT32
 cdef class LossFunction(object):
     cdef cDOUBLE get_loss(self, Item item, numpy.ndarray[cDOUBLE, ndim=1] weights)
     cdef int get_decision(self, Item item, numpy.ndarray[cDOUBLE, ndim=1] weights)
-    cdef numpy.ndarray[cDOUBLE, ndim=1] get_gradient(
-        self, numpy.ndarray[cDOUBLE, ndim=1] weights, Item item)
+    cdef object get_gradient(self, numpy.ndarray[cDOUBLE, ndim=1] weights, Item item)

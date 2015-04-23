@@ -91,13 +91,13 @@ cdef class Classifier(object):
                     print self.average_training_loss / self.items_processed
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
-            self.average_loss += self.predict_proba_item(item)
+            self.average_training_loss += self.predict_proba_item(item)
             self.weights = self.optimizer.step(item, self.items_processed, self.weights)
             self.items_processed += 1
     
     cpdef fit(self, Reader reader, continue_fitting=False):
         if not continue_fitting:
-            self.weights = np.zeros((reader.get_features_count(), 1), dtype=float)    
+            self.weights = np.zeros(reader.get_features_count(), dtype=float)    
             self.items_processed = 0
             self.holdout_items_processed = 0
             self.validation_index = 1

@@ -18,11 +18,9 @@ cdef class LossFunction(object):
         cdef cDOUBLE loss = self.get_loss(item, weights)
         return loss > 0.5
 
-    cdef np.ndarray[cDOUBLE, ndim=1] get_gradient(self, 
-                                        np.ndarray[cDOUBLE, ndim=1] weights, Item item):
+    cdef object get_gradient(self, np.ndarray[cDOUBLE, ndim=1] weights, Item item):
         cdef cDOUBLE sigmoid_values = self.get_loss(item, weights)
         cdef cINT32 label = item.label
-        cdef np.ndarray[cDOUBLE, ndim=1] features = item.features
-        return (label - self.get_loss(item, weights)) * features
+        return (label - self.get_loss(item, weights)) * item.features
 
 
