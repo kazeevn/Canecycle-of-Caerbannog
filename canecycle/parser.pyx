@@ -39,9 +39,6 @@ def read_shad_lsml_header(filename):
 
 
 cdef class Parser:
-    cdef HashFunction hash_function
-    cdef list format
-
     def __cinit__(self, HashFunction hash_function, list format_):
         self.hash_function = hash_function
         self.format = format_

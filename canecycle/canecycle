@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import argparse
-from canecycle.parser import read_shad_lsml_header, Parser
 from canecycle.hash_function import HashFunction
+from canecycle.parser import read_shad_lsml_header, Parser
 from canecycle.classifier import Classifier
 from canecycle.weight_manager import WeightManager
 from canecycle.optimizer import Optimizer
@@ -18,8 +18,8 @@ def main():
     parser.add_argument("-l", "--learn", type=str,
                         help="Input file for training in SHAD-LSML format")
     parser.add_argument("-h", "--holdout", type=check_negative, default=0,
-                        help="Each h-th line is not used for learning. After learning,
-                        the average loss over h-th lines is calculated")
+                        help="Each h-th line is not used for learning. After learning, "
+                        "the average loss over h-th lines is calculated")
     parser.add_argument("-b", "--hash-size", type=int,
                         help="Hash table size in bits")
     parser.add_argument("--progressive", type="store_true",
