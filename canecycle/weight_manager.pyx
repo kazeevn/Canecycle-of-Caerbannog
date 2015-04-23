@@ -1,3 +1,4 @@
+#cython: cdivision=True
 
 cdef class WeightManager(object):
     #(shiryaev) maybe (p,n) format would have been more intuitive here?..
@@ -6,16 +7,13 @@ cdef class WeightManager(object):
         you can apply it here.
         
         """
-        
         # np
         self.ones = apriori_mean # 0.5 by default
         # nq = npq/(1-q) = npq/(1-npq/np)
         self.zeros = apriori_variance / (1 - apriori_variance/apriori_mean) # 0.5 by default
-        self.sum = 0
     
     
     cpdef float get_weight(self, int label, float weight):
-        self.sum += 1
         #TODO(shiryaev) use weight
         if label == 1:
             self.ones += 1
@@ -24,6 +22,5 @@ cdef class WeightManager(object):
             self.zeros += 1
             return self.ones / self.zeros # * weight
         else:
-            self.sum -= 1
             raise ValueError("Unsupported label: %d" % label)
 
