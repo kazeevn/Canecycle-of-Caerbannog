@@ -3,6 +3,8 @@ from canecycle.item cimport Item
 from canecycle.hash_function cimport HashFunction
 from itertools import islice
 import string
+import scipy.sparse 
+
 
 def name_iterator():
     cdef unsigned int i
@@ -53,9 +55,10 @@ cdef class Parser:
         cdef str column_name
         cdef dict features
         cdef unsigned int item_format
+        cdef object matrix_features
         processed_line = line.rstrip().split(',')
-        item = Item(self.hash_function.hash_size)
         features = dict()
+        item = Item()
         for item_format, readout, column_name in \
             izip(self.format, processed_line, self.column_names):
             if readout == '':
@@ -70,7 +73,10 @@ cdef class Parser:
                     float(readout)
             elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
-            item.features.update(features)
+        matrix_features = scipy.sparse.dok_matrix(
+            (self.hash_function.hash_size, 1), dtype=float)
+        matrix_features.update(features)
+        item.features = scipy.sparse.coo_matrix(matrix_features)
         return item
     
     cpdef unsigned int get_features_count(self):

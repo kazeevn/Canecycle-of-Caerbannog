@@ -32,10 +32,10 @@ class TestParser(unittest.TestCase):
         item = parser.parse(line)
         self.assertEqual(item.label, -1)
         self.assertEqual(item.weight, 1)
-        self.assertEqual(item.features[1234, 0], 0)
-        self.assertEqual(item.features[1, 0], 0)
-        self.assertEqual(item.features[107535, 0], 1382)
-        self.assertEqual(item.features[641047, 0], 1)
+        self.assertEqual(item.features.getrow(1234)[0, 0], 0)
+        self.assertEqual(item.features.getrow(1)[0, 0], 0)
+        self.assertEqual(item.features.getrow(107535)[0, 0], 1382)
+        self.assertEqual(item.features.getrow(641047)[0, 0], 1)
         for line in input_file:
             item = parser.parse(line)
 

@@ -1,8 +1,8 @@
-import scipy.sparse
+#import scipy.sparse
 
 cdef class Item:
-    def __cinit__(self, unsigned int features_number):
+    def __cinit__(self):
         self.label = 0
         self.weight = 1.
-        self.features = scipy.sparse.dok_matrix(
-            (features_number, 1), dtype=float)    
+#        self.features = scipy.sparse.coo_matrix(
+#            (features_number, 1), dtype=float)    
