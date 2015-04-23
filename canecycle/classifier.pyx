@@ -1,17 +1,21 @@
-from __future__ import division
+#cython: boundscheck=False
+#cython: wraparound=False
+#cython: cdivision=True
+#cython: nonecheck=False
 
 import numpy as np
 cimport numpy as np
+#TODO(shiryaev): same c-types in all project files
 from cpython cimport bool as c_bool
 
 from canecycle.item cimport Item
 from canecycle.reader cimport Reader
 from canecycle.weight_manager cimport WeightManager
-#TODO(shiryaev) import->cimport
+#TODO(shiryaev) import->cimport?
 from canecycle.optimizer import Optimizer
 from canecycle.loss_function cimport LossFunction
 
-#TODO(shiryaev) save/load
+#TODO(shiryaev) save/load model
 cdef class Classifier(object):
     cdef WeightManager weight_manager
     cdef optimizer
@@ -80,15 +84,14 @@ cdef class Classifier(object):
                 self.validation_index *= 2
                 if self.store_progressive_validation:
                     self.progressive_validation_loss.append(
-                        self.predict_item(item))
+                        self.predict_proba_item(item))
                 if self.display:
                     #TODO(shiryaev): display progress
                     print self.items_processed,
                     print self.average_training_loss / self.items_processed
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
-            # TODO(kazeevn) what should Optimizer return?
-            # self.average_loss += self.optimizer.step(item, self.weights)
+            self.average_loss += self.predict_proba_item(item)
             self.weights = self.optimizer.step(item, self.items_processed, self.weights)
             self.items_processed += 1
     

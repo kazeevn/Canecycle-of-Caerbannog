@@ -35,6 +35,7 @@ cdef class Optimizer(object):
         cdef double step_size
         cdef np.ndarray[cINT32, ndim=1] col
         cdef np.ndarray[cDOUBLE, ndim=1] data
+        cdef np.ndarray[cDOUBLE, ndim=1] gradient
         features = item.features
         label = item.label
         step_size = self.stepSize * self.scaleDown ** step_number

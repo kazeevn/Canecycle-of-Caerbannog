@@ -1,13 +1,11 @@
 from item cimport Item
-from numpy cimport ndarray
+cimport numpy
 
-cdef class LossFunction:
-    cdef inline double get_loss(self, Item item, ndarray weights):
-        return 0.5
-    
-    cdef inline int get_decision(self, Item item, ndarray weights):
-        return 1
-    
-    cdef inline object get_gradient(self, object features, int label):
-        return features
-    
+ctypedef numpy.double_t cDOUBLE
+ctypedef numpy.int32_t cINT32
+
+cdef class LossFunction(object):
+    cdef cDOUBLE get_loss(self, Item item, numpy.ndarray[cDOUBLE, ndim=1] weights)
+    cdef int get_decision(self, Item item, numpy.ndarray[cDOUBLE, ndim=1] weights)
+    cdef numpy.ndarray[cDOUBLE, ndim=1] get_gradient(
+        self, numpy.ndarray[cDOUBLE, ndim=1] weights, Item item)
