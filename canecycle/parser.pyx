@@ -59,9 +59,9 @@ cdef class Parser:
                 item.label = int(readout) * 2 - 1
             elif item_format == ValueType_categorical:
                 item.features[self.hash_function.hash(
-                    column_name + readout)] = 1
+                    column_name + readout), 0] = 1
             elif item_format == ValueType_numerical:
-                item.features[self.hash_function.hash(column_name)] = \
+                item.features[self.hash_function.hash(column_name), 0] = \
                     float(readout)
             elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
