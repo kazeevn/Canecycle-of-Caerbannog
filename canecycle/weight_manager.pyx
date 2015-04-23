@@ -13,7 +13,7 @@ cdef class WeightManager(object):
         self.zeros = apriori_variance / (1 - apriori_variance/apriori_mean) # 0.5 by default
     
     
-    cdef float get_weight(self, int label, float weight):
+    cpdef float get_weight(self, int label, float weight):
         self.sum += 1
         #TODO(shiryaev) use weight
         if label == 1:
