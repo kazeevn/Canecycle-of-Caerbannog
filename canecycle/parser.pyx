@@ -1,3 +1,4 @@
+# cython: profile=True
 from itertools import izip, imap
 from canecycle.item cimport Item
 from canecycle.hash_function cimport HashFunction
@@ -51,6 +52,7 @@ cdef class Parser:
         processed_line = map(string.strip, line.split(','))
         item = Item(self.hash_function.hash_size)
         column_namer = name_iterator()
+        features = dict()
         for item_format, readout, column_name in \
             izip(self.format, processed_line, column_namer):
             if readout == '':
@@ -58,13 +60,14 @@ cdef class Parser:
             if item_format == ValueType_label:
                 item.label = int(readout) * 2 - 1
             elif item_format == ValueType_categorical:
-                item.features[self.hash_function.hash(
+                features[self.hash_function.hash(
                     column_name + readout), 0] = 1
             elif item_format == ValueType_numerical:
-                item.features[self.hash_function.hash(column_name), 0] = \
+                features[self.hash_function.hash(column_name), 0] = \
                     float(readout)
             elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
+            item.features.update(features)
         return item
     
     cpdef unsigned int get_features_count(self):
