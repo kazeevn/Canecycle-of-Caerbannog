@@ -4,7 +4,7 @@ from itertools import imap
 
 from canecycle.hash_function import HashFunction
 from canecycle.parser import Parser, read_shad_lsml_header
-from canecycle.reader import Reader
+from canecycle.reader import Reader, from_shad_lsml
 from canecycle.source import NotInitialized
 
 class TestReader(unittest.TestCase):
@@ -40,3 +40,9 @@ class TestReader(unittest.TestCase):
         reader.restart(-13)
         count_13 += sum(imap(lambda item: 1, reader))
         self.assertEqual(count_13, 1000)
+
+    def test_from_shad_lsml(self):
+        reader = from_shad_lsml(self.test_file, 3)
+        reader.restart(0)
+        self.assertEqual(sum(imap(lambda item: 1, reader)), 1000)
+        self.assertEqual(reader.get_features_count(), 2**3)
