@@ -16,7 +16,7 @@ cdef class Classifier(object):
     cdef optimizer
     cdef loss_function
     
-    cdef get_progressive_validation
+    cdef store_progressive_validation
     cdef unsigned int pass_number
     cdef unsigned long items_processed
     cdef unsigned long validation_index
@@ -31,7 +31,7 @@ cdef class Classifier(object):
     cdef display
     
     def __cinit__(self, optimizer, loss_function, weight_manager,
-            get_progressive_validation, int holdout, int pass_number,
+            store_progressive_validation, int holdout, int pass_number,
             display=False):
         
         if pass_number < 0:
@@ -40,7 +40,7 @@ cdef class Classifier(object):
         self.optimizer = optimizer
         self.loss_function = loss_function
         self.weight_manager = weight_manager
-        self.get_progressive_validation = get_progressive_validation
+        self.store_progressive_validation = store_progressive_validation
         self.holdout = holdout
         self.pass_number = pass_number
         self.display = display
@@ -77,7 +77,7 @@ cdef class Classifier(object):
             #validation routine
             if self.items_processed==self.validation_index - 1:
                 self.validation_index *= 2
-                if self.get_progressive_validation:
+                if self.store_progressive_validation:
                     self.progressive_validation_loss.append(
                         self.predict_item(item))
                 if self.display:
