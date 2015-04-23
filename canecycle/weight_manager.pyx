@@ -11,6 +11,7 @@ cdef class WeightManager(object):
         self.ones = apriori_mean # 0.5 by default
         # nq = npq/(1-q) = npq/(1-npq/np)
         self.zeros = apriori_variance / (1 - apriori_variance/apriori_mean) # 0.5 by default
+        self.sum = 0
     
     
     cpdef float get_weight(self, int label, float weight):
