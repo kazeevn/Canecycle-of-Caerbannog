@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import argparse
 from canecycle.hash_function import HashFunction
-from canecycle.parser import read_shad_lsml_header, Parser
+from canecycle.reader import from_shad_lsml
 from canecycle.classifier import Classifier
 from canecycle.weight_manager import WeightManager
 from canecycle.optimizer import Optimizer
@@ -14,15 +14,15 @@ def check_negative(value):
     return int_value
 
 def main():
-    parser = argparse.ArgumentParser(descripption="An FTRL-based online learning machine")
-    parser.add_argument("-l", "--learn", type=str,
+    parser = argparse.ArgumentParser(description="An FTRL-based online learning machine")
+    parser.add_argument("-l", "--learn", type=str, required=True,
                         help="Input file for training in SHAD-LSML format")
-    parser.add_argument("-h", "--holdout", type=check_negative, default=0,
+    parser.add_argument("-H", "--holdout", type=check_negative, default=0,
                         help="Each h-th line is not used for learning. After learning, "
                         "the average loss over h-th lines is calculated")
-    parser.add_argument("-b", "--hash-size", type=int,
+    parser.add_argument("-b", "--hash-size", type=int, required=True,
                         help="Hash table size in bits")
-    parser.add_argument("--progressive", type="store_true",
+    parser.add_argument("--progressive", action="store_true",
                         help="Enables output of progressive validation")
     parser.add_argument("--passes", type=int, default=1,
                         help="Number of passes on the learning data")
@@ -36,16 +36,15 @@ def main():
         parser.error("--predict requires --output")
     if args.passes <= 0:
         parser.error("--passes must be positive")
-
-    hash_function = HashFunction(args.b)
-    classifier = Classifier(Optimizer(), LossFunction(), WeightManager(),
+    loss_function = LossFunction()
+    optimizer = Optimizer(1e-2, 1e-2, 1e-2, 1e-4, loss_function)
+    classifier = Classifier(optimizer, loss_function, WeightManager(),
                             args.progressive, args.holdout, args.passes)
-    
-    format_ = read_shad_lsml_header(args.learn)
-    parser = Parser(hash_function, format_)
-    classifier.fit(args.learn, parser)
+
+    reader = from_shad_lsml(args.learn, args.hash_size)
+    classifier.fit(reader)
     if args.holdout != 0:
-        print("Average holdout loss: %f" % classifier.hold_out)
+        print("Average holdout loss: %f" % classifier.get_holdout_loss())
     # TODO(kazeevn) add progressive_validation
     
     if args.predict:

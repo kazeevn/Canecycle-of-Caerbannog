@@ -9,13 +9,13 @@ from canecycle.reader cimport Reader
 from canecycle.weight_manager cimport WeightManager
 #TODO(shiryaev) import->cimport
 from canecycle.optimizer import Optimizer
-from canecycle.loss_function import LossFunction
+from canecycle.loss_function cimport LossFunction
 
 #TODO(shiryaev) save/load
 cdef class Classifier(object):
     cdef WeightManager weight_manager
     cdef optimizer
-    cdef loss_function
+    cdef LossFunction loss_function
     
     cdef c_bool store_progressive_validation
     cdef unsigned int pass_number
@@ -24,7 +24,7 @@ cdef class Classifier(object):
     cdef np.ndarray weights
     
     cdef int holdout
-    cdef unsigned long holdout_items_passed
+    cdef unsigned long holdout_items_processed
     cdef list progressive_validation_loss # optimizer loss
     cdef float average_training_loss # optimizer loss
     cdef float holdout_loss # lossfunc loss
@@ -49,7 +49,7 @@ cdef class Classifier(object):
     cdef int predict_item(self, Item item):
         return self.loss_function.get_decision(item, self.weights)
     
-    cdef float predict_proba_item(self, Item item):
+    cdef float predict_proba_item(self, Item item) except *:
         return self.loss_function.get_loss(item, self.weights)
     
     def predict(self, Reader reader):
@@ -65,18 +65,18 @@ cdef class Classifier(object):
         for item in reader:
             yield self.predict_proba_item(item)
     
-    cdef void run_holdout_pass(self, Reader reader):
+    cdef void run_holdout_pass(self, Reader reader) except *:
         cdef Item item
         for item in reader:
             #TODO(shiryaev): display progress
             self.holdout_loss += self.predict_proba_item(item)
             self.holdout_items_processed += 1
     
-    cdef void run_train_pass(self, Reader reader):
+    cdef void run_train_pass(self, Reader reader) except *:
         cdef Item item
         for item in reader:
-            #validation routine
-            if self.items_processed==self.validation_index - 1:
+            # validation routine
+            if self.items_processed == self.validation_index - 1:
                 self.validation_index *= 2
                 if self.store_progressive_validation:
                     self.progressive_validation_loss.append(
@@ -87,15 +87,16 @@ cdef class Classifier(object):
                     print self.average_training_loss / self.items_processed
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
-            self.average_loss += self.optimizer.step(item, self.weights)
-            
+            # TODO(kazeevn) what should Optimizer return?
+            # self.average_loss += self.optimizer.step(item, self.weights)
+            self.weights = self.optimizer.step(item, self.items_processed, self.weights)
             self.items_processed += 1
     
-    cdef void fit(self, Reader reader, continue_fitting=False):
+    cpdef fit(self, Reader reader, continue_fitting=False):
         if not continue_fitting:
-            self.weights = np.ndarray((reader.get_features_count(), 1), dtype=float)    
+            self.weights = np.zeros((reader.get_features_count(), 1), dtype=float)    
             self.items_processed = 0
-            self.holdout_items = 0
+            self.holdout_items_processed = 0
             self.validation_index = 1
             self.average_training_loss = 0.
             self.holdout_loss = 0.
@@ -106,19 +107,19 @@ cdef class Classifier(object):
             self.run_train_pass(reader)
         
         self.average_training_loss /= self.items_processed
-        self.holdout_loss /= self.holdout_items_processed
         
-        #holdout pass
+        # holdout pass
         if self.holdout != 0:
             reader.restart(-self.holdout)
             self.run_holdout_pass(reader)
+            self.holdout_loss /= self.holdout_items_processed
     
-    def get_progressive_validation(self):
+    cpdef list get_progressive_validation(self):
         return self.progressive_validation_loss
     
-    def get_average_loss(self):
+    cpdef double get_average_loss(self):
         return self.average_training_loss
     
-    def get_holdout_loss(self):
+    cpdef double get_holdout_loss(self):
         return self.holdout_loss
 

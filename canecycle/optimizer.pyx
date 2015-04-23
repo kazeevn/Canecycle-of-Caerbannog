@@ -9,6 +9,8 @@ from item import Item
 
 from scipy.sparse import coo_matrix
 
+from canecycle.loss_function cimport LossFunction
+
 ctypedef np.int32_t cINT32
 ctypedef np.double_t cDOUBLE
 
@@ -19,7 +21,7 @@ cdef class Optimizer(object):
     cdef double l2Regularization
     cdef double stepSize
     cdef double scaleDown
-    cdef loss_function
+    cdef LossFunction loss_function
 
     def __init__(self, l1Regularization, l2Regularization, stepSize, scaleDown, loss_function):
         self.l1Regularization = l1Regularization
@@ -28,7 +30,7 @@ cdef class Optimizer(object):
         self.scaleDown = scaleDown
         self.loss_function = loss_function
 
-    def step(self, item, unsigned int step_number, weights):
+    cpdef object step(self, item, unsigned int step_number, weights):
         cdef int index, element_index, label
         cdef double step_size
         cdef np.ndarray[cINT32, ndim=1] col
