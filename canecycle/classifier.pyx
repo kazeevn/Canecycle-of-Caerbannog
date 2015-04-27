@@ -23,21 +23,21 @@ cdef class Classifier(object):
     cdef LossFunction loss_function
     
     cdef c_bool store_progressive_validation
-    cdef unsigned int pass_number
-    cdef unsigned long items_processed
-    cdef unsigned long validation_index
+    cdef np.uint64_t pass_number
+    cdef np.uint64_t items_processed
+    cdef np.uint64_t validation_index
     cdef np.ndarray weights
     
-    cdef int holdout
-    cdef unsigned long holdout_items_processed
+    cdef np.int_t holdout
+    cdef np.uint64_t holdout_items_processed
     cdef list progressive_validation_loss # optimizer loss
-    cdef float average_training_loss # optimizer loss
-    cdef float holdout_loss # lossfunc loss
+    cdef np.float_t average_training_loss # optimizer loss
+    cdef np.float_t holdout_loss # lossfunc loss
     
     cdef c_bool display
     
     def __cinit__(self, optimizer, loss_function, WeightManager weight_manager,
-            c_bool store_progressive_validation, int holdout, int pass_number,
+            c_bool store_progressive_validation, np.int_t holdout, np.uint64_t pass_number,
             c_bool display=False):
         
         if pass_number < 0:
@@ -51,10 +51,10 @@ cdef class Classifier(object):
         self.pass_number = pass_number
         self.display = display
     
-    cdef int predict_item(self, Item item):
+    cdef np.int_t predict_item(self, Item item):
         return self.loss_function.get_decision(item, self.weights)
     
-    cdef float predict_proba_item(self, Item item) except *:
+    cdef np.float_t predict_proba_item(self, Item item) except *:
         return self.loss_function.get_loss(item, self.weights)
     
     def predict(self, Reader reader):
@@ -98,14 +98,14 @@ cdef class Classifier(object):
     
     cpdef fit(self, Reader reader, continue_fitting=False):
         if not continue_fitting:
-            self.weights = np.zeros(reader.get_features_count(), dtype=float)    
+            self.weights = np.zeros(reader.get_features_count(), dtype=np.float_)    
             self.items_processed = 0
             self.holdout_items_processed = 0
             self.validation_index = 1
             self.average_training_loss = 0.
             self.holdout_loss = 0.
         
-        cdef unsigned int pass_index
+        cdef np.uint64_t pass_index
         for pass_index in range(self.pass_number):
             reader.restart(self.holdout)
             self.run_train_pass(reader)
