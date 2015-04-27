@@ -11,7 +11,7 @@ class OptimizerTestCase(unittest.TestCase):
     def test_zero_vector(self):
         loss_function = LossFunction()
         item = Item()
-        item.indexes = np.array([], dtype=np.int32)
+        item.indexes = np.array([], dtype=np.uint64)
         item.data = np.array([])
         optimizer = Optimizer(l1Regularization=0, l2Regularization=0,
                               stepSize=0.1, scaleDown=0.9, loss_function=loss_function)
