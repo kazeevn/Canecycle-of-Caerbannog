@@ -39,7 +39,7 @@ cdef class Optimizer(object):
         step_size = self.stepSize * self.scaleDown ** step_number
         gradient = self.loss_function.get_gradient(weights, item)
         newStep = gradient * step_size
-        col = newStep.col
+        col = newStep.row
         data = newStep.data
         for index in range(np.shape(data)[0]):
             candidate_weight = weights[col[index]] - newStep.data[index]
