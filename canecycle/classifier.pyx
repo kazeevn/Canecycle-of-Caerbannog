@@ -64,8 +64,8 @@ cdef class Classifier(object):
             yield self.predict_item(item)
     
     def predict_proba(self, Reader reader):
-        #TODO(shiryaev): display
         cdef Item item
+        reader.restart(0)
         for item in reader:
             yield self.predict_proba_item(item)
     

@@ -48,10 +48,11 @@ def main():
     # TODO(kazeevn) add progressive_validation
     
     if args.predict:
-        format_ = read_shad_lsml_header(args.learn)
-        parser = Parser(hash_function, format_)
-        calssifier.predict(args.predict, parser, args.output)
-        
+        predict_file = from_shad_lsml(args.predict, args.hash_size)
+        output_file = open(args.output, 'w')
+        for prediction in classifier.predict_proba(predict_file):
+            output_file.write("%g\n" % prediction)
+        output_file.close()
 
 if __name__ == '__main__':
     main()
