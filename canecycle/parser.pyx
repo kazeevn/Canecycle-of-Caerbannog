@@ -78,8 +78,6 @@ cdef class Parser:
         for item_format, readout, column_name, hash in \
             izip(self.format, processed_line, self.column_names, self.numeric_hashes):
             if readout == '':
-                if item_format in (ValueType_categorical, ValueType_numerical):
-                    index += 1
                 continue
             if item_format == ValueType_label:
                 item.label = int(readout) * 2 - 1
@@ -94,6 +92,8 @@ cdef class Parser:
                 index += 1
             elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
+        item.data.resize(index)
+        item.indexes.resize(index)
         return item
     
     cpdef unsigned int get_features_count(self):
