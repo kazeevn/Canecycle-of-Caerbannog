@@ -1,3 +1,5 @@
+cimport numpy
+
 cdef class HashFunction:
-    cdef readonly unsigned long hash_size
-    cpdef unsigned long hash(self, str string)
+    cdef readonly numpy.uint64_t hash_size
+    cpdef numpy.uint64_t hash(self, str string)

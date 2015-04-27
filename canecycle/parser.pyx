@@ -4,8 +4,8 @@ from canecycle.item cimport Item
 from canecycle.hash_function cimport HashFunction
 from itertools import islice, count
 import string
-cimport numpy
-import numpy
+from numpy cimport ndarray, uint64_t
+from numpy import uint64, float_
 
 def name_iterator():
     cdef unsigned int i
@@ -60,6 +60,7 @@ cdef class Parser:
                 # None would have been more appropriate, but Cython doesn't support
                 self.numeric_hashes.append(0)
     
+
     cpdef Item parse(self, str line):
         cdef list processed_line
         cdef Item item
@@ -67,13 +68,13 @@ cdef class Parser:
         cdef str column_name
         cdef list indexes
         cdef list data
-        cdef unsigned int item_format
-        cdef unsigned long hash
-        cdef unsigned long index
+        cdef uint64_t item_format
+        cdef uint64_t hash
+        cdef uint64_t index
         processed_line = line.rstrip().split(',')
         item = Item()
-        item.indexes = numpy.ndarray(self.feature_columns_count, dtype=numpy.uint64)
-        item.data = numpy.ndarray(self.feature_columns_count, dtype=numpy.float_)
+        item.indexes = ndarray(self.feature_columns_count, dtype=uint64)
+        item.data = ndarray(self.feature_columns_count, dtype=float_)
         index = 0
         for item_format, readout, column_name, hash in \
             izip(self.format, processed_line, self.column_names, self.numeric_hashes):
@@ -96,7 +97,7 @@ cdef class Parser:
         item.indexes.resize(index)
         return item
     
-    cpdef unsigned int get_features_count(self):
+    cpdef uint64_t get_features_count(self):
         return self.hash_function.hash_size
                 
         

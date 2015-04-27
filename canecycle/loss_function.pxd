@@ -1,11 +1,8 @@
 from item cimport Item
 cimport numpy
 
-ctypedef numpy.double_t cDOUBLE
-ctypedef numpy.int32_t cINT32
-
 cdef class LossFunction(object):
-    cpdef cDOUBLE get_loss(self, Item item, numpy.ndarray[cDOUBLE, ndim=1] weights)
-    cpdef int get_decision(self, Item item, numpy.ndarray[cDOUBLE, ndim=1] weights)
-    cpdef cDOUBLE get_proba(self, Item item, numpy.ndarray[cDOUBLE, ndim=1] weights)
-    cpdef numpy.ndarray[cDOUBLE, ndim=1] get_gradient(self, numpy.ndarray[cDOUBLE, ndim=1] weights, Item item)
+    cpdef numpy.float_t get_loss(self, Item item, numpy.ndarray[numpy.float_t, ndim=1] weights)
+    cpdef numpy.int_t get_decision(self, Item item, numpy.ndarray[numpy.float_t, ndim=1] weights)
+    cpdef numpy.float_t get_proba(self, Item item, numpy.ndarray[numpy.float_t, ndim=1] weights) except *
+    cpdef numpy.ndarray[numpy.float_t, ndim=1] get_gradient(self, numpy.ndarray[numpy.float_t, ndim=1] weights, Item item)

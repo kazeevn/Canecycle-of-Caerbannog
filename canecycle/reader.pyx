@@ -4,7 +4,7 @@ from canecycle.parser import read_shad_lsml_header
 from canecycle.hash_function cimport HashFunction
 
 # Should be @staticmethod, but Cython doesn't support it in cpdef
-cpdef Reader from_shad_lsml(str filename, unsigned int hash_size):
+cpdef Reader from_shad_lsml(str filename, uint64_t hash_size):
     cdef list format
     cdef Parser parser
     cdef Reader reader
@@ -16,7 +16,7 @@ cpdef Reader from_shad_lsml(str filename, unsigned int hash_size):
 
 
 cdef class Reader(Source):
-    def __cinit__(self, str filename, Parser parser, unsigned int skip):
+    def __cinit__(self, str filename, Parser parser, uint64_t skip):
         self.is_ready = False
         self.parser = parser
         self.skip = skip
@@ -63,5 +63,5 @@ cdef class Reader(Source):
             self.holdout_counter = 0
         return self.parser.parse(line)
     
-    cpdef unsigned int get_features_count(self):
+    cpdef uint64_t get_features_count(self):
         return self.parser.get_features_count()

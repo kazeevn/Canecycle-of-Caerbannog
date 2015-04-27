@@ -1,8 +1,9 @@
 # cython: profile=True
 import spooky
 import ctypes
+cimport numpy
 
-cdef unsigned int MAX_HASH_SIZE = 63
+cdef numpy.uint64_t MAX_HASH_SIZE = 63
 
 cdef class HashFunction:
     def __cinit__(self, hash_size):
@@ -14,5 +15,5 @@ cdef class HashFunction:
             raise ValueError("Hash size should be positive.")
         self.hash_size = 2**hash_size
     
-    cpdef unsigned long hash(self, str string):
+    cpdef numpy.uint64_t hash(self, str string):
         return spooky.hash64(string) % self.hash_size
