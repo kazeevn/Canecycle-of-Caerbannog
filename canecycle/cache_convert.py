@@ -14,7 +14,9 @@ def main():
                         help="Hash table size in bits")
     args = parser.parse_args()
     reader = from_shad_lsml(args.input, args.hash_size)
-    cache_writer = CacheWriter(reader.parser.feature_columns_count, args.hash_size)
+    reader.restart(0)
+    cache_writer = CacheWriter(reader.get_feature_columns_count(), args.hash_size)
+    cache_writer.open(args.output)
     for item in reader:
         cache_writer.write_item(item)
     cache_writer.close()

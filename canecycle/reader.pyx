@@ -68,3 +68,6 @@ cdef class Reader(Source):
     
     cpdef close(self):
         self.file.close()
+
+    cpdef uint64_t get_feature_columns_count(self):
+        return self.parser.feature_columns_count
