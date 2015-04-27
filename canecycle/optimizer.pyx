@@ -11,7 +11,6 @@ from item import Item
 
 from canecycle.loss_function cimport LossFunction
 
-
 cdef class Optimizer(object):
 
     cdef double l1Regularization
@@ -30,7 +29,7 @@ cdef class Optimizer(object):
     cpdef np.ndarray[np.float_t, ndim=1] step(self, item, np.uint64_t step_number, 
              np.ndarray[np.float_t, ndim=1] weights):
         cdef np.uint64_t index, element_index
-        cdef double step_size
+        cdef np.float_t step_size
         cdef np.ndarray[np.uint64_t, ndim=1] col
         cdef np.ndarray[np.float_t, ndim=1]  gradient
         step_size = self.stepSize * self.scaleDown ** step_number

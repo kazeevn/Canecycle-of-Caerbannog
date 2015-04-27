@@ -1,4 +1,4 @@
-# cython: profile=True
+#cython: profile=True
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
@@ -70,14 +70,14 @@ cdef class Classifier(object):
         for item in reader:
             yield self.predict_proba_item(item)
     
-    cdef void run_holdout_pass(self, Reader reader):
+    cdef void run_holdout_pass(self, Reader reader) except *:
         cdef Item item
         for item in reader:
             #TODO(shiryaev): display progress
             self.holdout_loss += self.predict_proba_item(item)
             self.holdout_items_processed += 1
     
-    cdef void run_train_pass(self, Reader reader):
+    cdef void run_train_pass(self, Reader reader) except *:
         cdef Item item
         for item in reader:
             # validation routine
@@ -98,7 +98,7 @@ cdef class Classifier(object):
     
     cpdef fit(self, Reader reader, continue_fitting=False):
         if not continue_fitting:
-            self.weights = np.zeros(reader.get_features_count(), dtype=np.float_)    
+            self.weights = np.ones(reader.get_features_count(), dtype=np.float_)     
             self.items_processed = 0
             self.holdout_items_processed = 0
             self.validation_index = 1

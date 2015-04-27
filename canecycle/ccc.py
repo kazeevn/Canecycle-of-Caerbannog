@@ -37,7 +37,7 @@ def main():
     if args.passes <= 0:
         parser.error("--passes must be positive")
     loss_function = LossFunction()
-    optimizer = Optimizer(1e-2, 1e-2, 1e-1, 1e-3, loss_function)
+    optimizer = Optimizer(0, 0, 1e-5, 1, loss_function)
     classifier = Classifier(optimizer, loss_function, WeightManager(),
                             args.progressive, args.holdout, args.passes)
 
