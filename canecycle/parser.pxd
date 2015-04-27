@@ -7,7 +7,7 @@ cdef class Parser:
     cdef list format
     cdef list column_names
     cdef list numeric_hashes
-    cdef uint64_t feature_columns_count
+    cdef public uint64_t feature_columns_count
     cpdef Item parse(self, str line)
     cpdef uint64_t get_features_count(self)
 

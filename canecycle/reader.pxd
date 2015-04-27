@@ -16,3 +16,4 @@ cdef class Reader(Source):
     
     cpdef restart(self, int holdout)
     cpdef uint64_t get_features_count(self)
+    cpdef close(self)

@@ -65,3 +65,6 @@ cdef class Reader(Source):
     
     cpdef uint64_t get_features_count(self):
         return self.parser.get_features_count()
+    
+    cpdef close(self):
+        self.file.close()
