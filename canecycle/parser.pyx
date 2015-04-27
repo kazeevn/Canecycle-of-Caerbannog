@@ -2,7 +2,7 @@
 from itertools import izip, imap
 from canecycle.item cimport Item
 from canecycle.hash_function cimport HashFunction
-from itertools import islice
+from itertools import islice, count
 import string
 cimport numpy
 import numpy
@@ -49,7 +49,7 @@ cdef class Parser:
         self.format = format_
         column_namer = name_iterator()
         self.column_names = list(islice(column_namer, len(self.format)))
-        self.features_count = sum(filter(
+        self.feature_columns_count = len(filter(
             lambda item_format: item_format in (ValueType_categorical, ValueType_numerical),
             self.format))
         self.numeric_hashes = list()
@@ -69,28 +69,31 @@ cdef class Parser:
         cdef list data
         cdef unsigned int item_format
         cdef unsigned long hash
+        cdef unsigned long index
         processed_line = line.rstrip().split(',')
-        indexes = list()
-        data = list()
         item = Item()
+        item.indexes = numpy.ndarray(self.feature_columns_count, dtype=numpy.uint64)
+        item.data = numpy.ndarray(self.feature_columns_count, dtype=numpy.float_)
+        index = 0
         for item_format, readout, column_name, hash in \
             izip(self.format, processed_line, self.column_names, self.numeric_hashes):
             if readout == '':
+                if item_format in (ValueType_categorical, ValueType_numerical):
+                    index += 1
                 continue
             if item_format == ValueType_label:
                 item.label = int(readout) * 2 - 1
             elif item_format == ValueType_categorical:
-                indexes.append(self.hash_function.hash(
-                    column_name + readout))
-                data.append(1.)
+                item.indexes[index] = self.hash_function.hash(column_name + readout)
+                item.data[index] = 1.
+                index += 1
             elif item_format == ValueType_numerical:
                 # In __init__ we precalculate hashes for numeric values
-                indexes.append(hash)
-                data.append(float(readout))
+                item.indexes[index] = hash
+                item.data[index] = float(readout)
+                index += 1
             elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
-        item.indexes = numpy.array(indexes, dtype=numpy.uint64)
-        item.data = numpy.array(data, dtype=numpy.float_)
         return item
     
     cpdef unsigned int get_features_count(self):

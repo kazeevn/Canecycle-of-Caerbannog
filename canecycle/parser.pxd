@@ -6,7 +6,7 @@ cdef class Parser:
     cdef list format
     cdef list column_names
     cdef list numeric_hashes
-    cdef unsigned int features_count
+    cdef unsigned int feature_columns_count
     cpdef Item parse(self, str line)
     cpdef unsigned int get_features_count(self)
 
