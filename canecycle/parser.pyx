@@ -44,10 +44,21 @@ def read_shad_lsml_header(filename):
 
 cdef class Parser:
     def __cinit__(self, HashFunction hash_function, list format_):
+        cdef str colomn_name
         self.hash_function = hash_function
         self.format = format_
         column_namer = name_iterator()
         self.column_names = list(islice(column_namer, len(self.format)))
+        self.features_count = sum(filter(
+            lambda item_format: item_format in (ValueType_categorical, ValueType_numerical),
+            self.format))
+        self.numeric_hashes = list()
+        for column_name, item_format in izip(self.column_names, self.format):
+            if item_format == ValueType_numerical:
+                self.numeric_hashes.append(self.hash_function.hash(column_name))
+            else:
+                # None would have been more appropriate, but Cython doesn't support
+                self.numeric_hashes.append(0)
     
     cpdef Item parse(self, str line):
         cdef list processed_line
@@ -57,12 +68,13 @@ cdef class Parser:
         cdef list indexes
         cdef list data
         cdef unsigned int item_format
+        cdef unsigned long hash
         processed_line = line.rstrip().split(',')
         indexes = list()
         data = list()
         item = Item()
-        for item_format, readout, column_name in \
-            izip(self.format, processed_line, self.column_names):
+        for item_format, readout, column_name, hash in \
+            izip(self.format, processed_line, self.column_names, self.numeric_hashes):
             if readout == '':
                 continue
             if item_format == ValueType_label:
@@ -72,7 +84,8 @@ cdef class Parser:
                     column_name + readout))
                 data.append(1.)
             elif item_format == ValueType_numerical:
-                indexes.append(self.hash_function.hash(column_name))
+                # In __init__ we precalculate hashes for numeric values
+                indexes.append(hash)
                 data.append(float(readout))
             elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
