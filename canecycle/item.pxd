@@ -1,4 +1,7 @@
+from numpy cimport ndarray
+
 cdef class Item:
     cdef public int label
     cdef public double weight
-    cdef public object features 
+    cdef ndarray indexes
+    cdef ndarray data

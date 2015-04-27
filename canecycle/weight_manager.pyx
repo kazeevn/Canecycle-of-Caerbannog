@@ -1,3 +1,4 @@
+#cython: profile=True
 #cython: cdivision=True
 
 cdef class WeightManager(object):

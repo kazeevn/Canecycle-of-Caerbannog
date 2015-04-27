@@ -1,3 +1,4 @@
+# cython: profile=True
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
@@ -69,14 +70,14 @@ cdef class Classifier(object):
         for item in reader:
             yield self.predict_proba_item(item)
     
-    cdef void run_holdout_pass(self, Reader reader) except *:
+    cdef void run_holdout_pass(self, Reader reader):
         cdef Item item
         for item in reader:
             #TODO(shiryaev): display progress
             self.holdout_loss += self.predict_proba_item(item)
             self.holdout_items_processed += 1
     
-    cdef void run_train_pass(self, Reader reader) except *:
+    cdef void run_train_pass(self, Reader reader):
         cdef Item item
         for item in reader:
             # validation routine

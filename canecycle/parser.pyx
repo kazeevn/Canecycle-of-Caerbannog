@@ -1,3 +1,4 @@
+# cython: profile=True
 from itertools import izip, imap
 from canecycle.item cimport Item
 from canecycle.hash_function cimport HashFunction
