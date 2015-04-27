@@ -11,8 +11,8 @@ class OptimizerTestCase(unittest.TestCase):
     def test_zero_vector(self):
         loss_function = LossFunction()
         item = Item()
-        point = coo_matrix([0., 0., 0.])
-        item.features = point
+        item.indexes = np.array([], dtype=np.int32)
+        item.data = np.array([])
         optimizer = Optimizer(l1Regularization=0, l2Regularization=0,
                               stepSize=0.1, scaleDown=0.9, loss_function=loss_function)
         test_value = np.random.rand(3)

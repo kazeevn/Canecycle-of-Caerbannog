@@ -22,6 +22,8 @@ cdef class LossFunction(object):
         dot_product = 0.0
         for index, feature_value in enumerate(features_values):
             dot_product += feature_value * weights[features_indices[index]]
+        print dot_product
+        return 1.
         return 1. / (1. + np.exp(-dot_product))
 
 
