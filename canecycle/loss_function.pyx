@@ -39,7 +39,7 @@ cdef class LossFunction(object):
     cpdef np.ndarray[np.float_t, ndim=1] get_gradient(self, np.ndarray[np.float_t, ndim=1] weights, Item item):
         cdef np.float_t sigmoid_values = self.get_loss(item, weights)
         cdef np.float_t label = float(item.label)
-        return -(sigmoid_values - label) * item.data
+        return (sigmoid_values - label) * item.data
 
 
 

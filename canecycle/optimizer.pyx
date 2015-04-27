@@ -38,12 +38,12 @@ cdef class Optimizer(object):
         newStep = gradient * step_size
         col = item.indexes
         for index in range(np.shape(newStep)[0]):
-            candidate_weight = weights[col[index]] - newStep.newStep[index]
+            candidate_weight = weights[col[index]] - newStep[index]
             if candidate_weight > 0:
-                candidate_step = candidate_weight - self.l1Regularization * gradient.newStep[index]
+                candidate_step = candidate_weight - self.l1Regularization * step_size
                 weights[col[index]] = max(0.0, candidate_step)
             else:
-                candidate_step = candidate_weight + self.l1Regularization * gradient.newStep[index]
+                candidate_step = candidate_weight + self.l1Regularization * step_size
                 weights[col[index]] = min(0.0, candidate_step)
         return weights
 
