@@ -8,12 +8,8 @@ import numpy as np
 cimport numpy as np
 from item import Item
 
-from scipy.sparse import coo_matrix
 
 from canecycle.loss_function cimport LossFunction
-
-ctypedef np.int32_t cINT32
-ctypedef np.double_t cDOUBLE
 
 
 cdef class Optimizer(object):
@@ -31,24 +27,23 @@ cdef class Optimizer(object):
         self.scaleDown = scaleDown
         self.loss_function = loss_function
 
-    cpdef np.ndarray[cDOUBLE, ndim=1] step(self, item, unsigned int step_number, 
-             np.ndarray[cDOUBLE, ndim=1] weights):
-        cdef int index, element_index
+    cpdef np.ndarray[np.float_t, ndim=1] step(self, item, np.uint64_t step_number, 
+             np.ndarray[np.float_t, ndim=1] weights):
+        cdef np.uint64_t index, element_index
         cdef double step_size
-        cdef np.ndarray[cINT32, ndim=1] col
-        cdef np.ndarray[cDOUBLE, ndim=1] data, gradient
+        cdef np.ndarray[np.uint64_t, ndim=1] col
+        cdef np.ndarray[np.float_t, ndim=1]  gradient
         step_size = self.stepSize * self.scaleDown ** step_number
         gradient = self.loss_function.get_gradient(weights, item)
         newStep = gradient * step_size
         col = item.indexes
-        data = newStep.data
-        for index in range(np.shape(data)[0]):
-            candidate_weight = weights[col[index]] - newStep.data[index]
+        for index in range(np.shape(newStep)[0]):
+            candidate_weight = weights[col[index]] - newStep.newStep[index]
             if candidate_weight > 0:
-                candidate_step = candidate_weight - self.l1Regularization * gradient.data[index]
+                candidate_step = candidate_weight - self.l1Regularization * gradient.newStep[index]
                 weights[col[index]] = max(0.0, candidate_step)
             else:
-                candidate_step = candidate_weight + self.l1Regularization * gradient.data[index]
+                candidate_step = candidate_weight + self.l1Regularization * gradient.newStep[index]
                 weights[col[index]] = min(0.0, candidate_step)
         return weights
 
