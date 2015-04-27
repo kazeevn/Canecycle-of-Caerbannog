@@ -4,8 +4,8 @@ from canecycle.item cimport Item
 from canecycle.hash_function cimport HashFunction
 from itertools import islice
 import string
-import scipy.sparse 
-
+cimport numpy
+import numpy
 
 def name_iterator():
     cdef unsigned int i
@@ -54,11 +54,12 @@ cdef class Parser:
         cdef Item item
         cdef str readout
         cdef str column_name
-        cdef dict features
+        cdef list indexes
+        cdef list data
         cdef unsigned int item_format
-        cdef object matrix_features
         processed_line = line.rstrip().split(',')
-        features = dict()
+        indexes = list()
+        data = list()
         item = Item()
         for item_format, readout, column_name in \
             izip(self.format, processed_line, self.column_names):
@@ -67,17 +68,16 @@ cdef class Parser:
             if item_format == ValueType_label:
                 item.label = int(readout) * 2 - 1
             elif item_format == ValueType_categorical:
-                features[self.hash_function.hash(
-                    column_name + readout), 0] = 1.
+                indexes.append(self.hash_function.hash(
+                    column_name + readout))
+                data.append(1.)
             elif item_format == ValueType_numerical:
-                features[self.hash_function.hash(column_name), 0] = \
-                    float(readout)
+                indexes.append(self.hash_function.hash(column_name))
+                data.append(float(readout))
             elif item_format != ValueType_skip:
                 raise ValueError("Invalid format %s" % item_format)
-        matrix_features = scipy.sparse.dok_matrix(
-            (self.hash_function.hash_size, 1), dtype=float)
-        matrix_features.update(features)
-        item.features = scipy.sparse.coo_matrix(matrix_features)
+        item.indexes = numpy.array(indexes, dtype=numpy.uint64)
+        item.data = numpy.array(data, dtype=numpy.float_)
         return item
     
     cpdef unsigned int get_features_count(self):
