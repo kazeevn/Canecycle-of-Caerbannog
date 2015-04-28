@@ -1,3 +1,4 @@
+# cython: profile=True
 import tables
 cimport numpy
 import numpy
@@ -34,8 +35,10 @@ cdef class CacheWriter(object):
         cdef numpy.ndarray mapped_item
         cdef numpy.ndarray metadata
         cdef object metadata_table
-        
-        self.file = tables.open_file(filename, mode='w')
+        cdef object filters
+
+        filters = tables.Filters(complib='blosc5')
+        self.file = tables.open_file(filename, mode='w', chunkshape=(10000, 1), filters=filters)
         self.objects_written = 0
         mapped_item = numpy.ndarray(0, dtype=self.struct_mapping)
         metadata = numpy.ndarray((1, ), dtype=[('hash_size', 'uint64'),])
