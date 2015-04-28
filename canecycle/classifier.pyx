@@ -45,8 +45,8 @@ cdef class Classifier(object):
     
     def __cinit__(self, optimizer, LossFunction loss_function, WeightManager weight_manager,
             c_bool store_progressive_validation, np.int_t holdout, np.uint64_t pass_number,
-            c_bool display=False, np.uint32_t save_period=None, str save_path_prefix=None,
-            np.uint64_t max_iteration=None):
+            c_bool display=False, np.uint32_t save_period=0, str save_path_prefix='',
+            np.uint64_t max_iteration=1000000000):
         
         if pass_number < 0:
             raise ValueError("Negative number of passes.")
@@ -120,7 +120,7 @@ cdef class Classifier(object):
                         self.average_training_loss / self.items_processed,
                         self.predict_proba_item(item))
             
-            if self.save_period != None or self.items_processed == self.max_iteration:
+            if self.save_period != 0 or self.items_processed == self.max_iteration:
                 if self.items_processed % self.save_period == 0 and \
                         self.items_processed != 0:
                     self.save_model()
