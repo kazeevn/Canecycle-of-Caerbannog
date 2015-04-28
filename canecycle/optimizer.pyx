@@ -13,37 +13,47 @@ from canecycle.loss_function cimport LossFunction
 
 cdef class Optimizer(object):
 
-    cdef double l1Regularization
-    cdef double l2Regularization
-    cdef double stepSize
-    cdef double scaleDown
+    cdef np.float_t l1Regularization
+    cdef np.float_t l2Regularization
+    cdef np.float_t alpha
+    cdef np.float_t betta
+    cdef np.ndarray z
+    cdef np.ndarray n
     cdef LossFunction loss_function
 
-    def __init__(self, l1Regularization, l2Regularization, stepSize, scaleDown, loss_function):
+    def __cinit__(self, l1Regularization, l2Regularization, feature_space_size, 
+                  alpha, betta, loss_function):
         self.l1Regularization = l1Regularization
         self.l2Regularization = l2Regularization
-        self.stepSize = stepSize
-        self.scaleDown = scaleDown
+        self.z = np.zeros(feature_space_size)
+        self.n = np.zeros(feature_space_size)
+        self.alpha = alpha
+        self.betta = betta
         self.loss_function = loss_function
 
-    cpdef np.ndarray[np.float_t, ndim=1] step(self, item, np.uint64_t step_number, 
-             np.ndarray[np.float_t, ndim=1] weights):
-        cdef np.uint64_t index, element_index
-        cdef np.float_t step_size
-        cdef np.ndarray[np.uint64_t, ndim=1] col
-        cdef np.ndarray[np.float_t, ndim=1]  gradient
-        step_size = self.stepSize * self.scaleDown ** step_number
-        gradient = self.loss_function.get_gradient(weights, item)
-        newStep = gradient * step_size
-        col = item.indexes
-        for index in range(np.shape(newStep)[0]):
-            candidate_weight = weights[col[index]] - newStep[index] - self.l2Regularization * weights[col[index]]
-            if candidate_weight > 0:
-                candidate_step = candidate_weight - self.l1Regularization * step_size
-                weights[col[index]] = max(0.0, candidate_step)
+    cpdef np.ndarray[np.float_t, ndim=1] step(self, item, 
+                                              np.ndarray[np.float_t, ndim=1] weights):
+        cdef np.ndarray[np.uint64_t, ndim=1] non_zero_indices = item.indexes
+        cdef np.ndarray[np.float_t, ndim=1] non_zero_values = item.data
+        cdef np.uint64_t index, index_in_vector
+        for index, index_in_vector in enumerate(non_zero_indices):
+            if abs(self.z[index_in_vector]) < self.l1Regularization:
+                weights[index_in_vector] = 0.0
             else:
-                candidate_step = candidate_weight + self.l1Regularization * step_size
-                weights[col[index]] = min(0.0, candidate_step)
+                weights[index_in_vector] = self.betta + np.sqrt(self.n[index_in_vector])
+                weights[index_in_vector] /= self.alpha
+                weights[index_in_vector] += self.l2Regularization
+                weights[index_in_vector] = -1. / weights[index_in_vector]
+                weights[index_in_vector] *= (self.z[index_in_vector] - 
+                                 np.sign(self.z[index_in_vector]) * self.l2Regularization)
+        cdef np.float_t prediction = self.loss_function.get_proba(item, weights)
+        cdef np.ndarray[np.float_t, ndim=1] gradient = self.loss_function.get_gradient(item, weights)
+        cdef np.ndarray[np.float_t, ndim=1] sigma = np.sqrt(self.n[non_zero_indices] + gradient ** 2)
+        sigma -= np.sqrt(self.n[non_zero_indices])
+        sigma /= self.alpha
+        self.z[non_zero_indices] += gradient
+        self.z[non_zero_indices] -= sigma * weights[non_zero_indices]
+        self.n[non_zero_indices] += gradient ** 2
         return weights
 
 

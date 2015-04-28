@@ -17,7 +17,7 @@ cdef class LossFunction(object):
         cdef np.ndarray[numpy.uint64_t, ndim=1] features_indices = item.indexes
         cdef np.ndarray[np.float_t, ndim=1] features_values = item.data
         cdef np.float_t feature_value, dot_product
-        cdef np.int_t index
+        cdef np.uint64_t index
         
         dot_product = 0.0
         for index, feature_value in enumerate(features_values):
@@ -38,8 +38,8 @@ cdef class LossFunction(object):
         loss = -np.log(prediction) if label == 1 else -np.log(1. - prediction)
         return loss
 
-    cpdef np.ndarray[np.float_t, ndim=1] get_gradient(
-        self, np.ndarray[np.float_t, ndim=1] weights, Item item):
+    cpdef np.ndarray[np.float_t, ndim=1] get_gradient(self, Item item,
+         np.ndarray[np.float_t, ndim=1] weights):
         cdef np.float_t sigmoid_values = self.get_loss(item, weights)
         cdef np.float_t label = float(item.label)
         return (sigmoid_values - label) * item.data
