@@ -1,7 +1,8 @@
+cimport numpy as np
 
 cdef class WeightManager(object):
-    cdef float ones
-    cdef float zeros
+    cdef np.float_t ones
+    cdef np.float_t zeros
     
-    cpdef float get_weight(self, int label, float weight)
+    cpdef np.float_t get_weight(self, np.int_t label, np.float_t weight)
 
