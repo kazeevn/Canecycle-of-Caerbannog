@@ -1,5 +1,5 @@
 Required python packages
-scipy
+numpy
 spooky
 
 Installation
