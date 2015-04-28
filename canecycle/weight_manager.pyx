@@ -27,3 +27,12 @@ cdef class WeightManager(object):
         else:
             raise ValueError("Unsupported label: %d" % label)
 
+    def __reduce__(self):
+        params = {}
+        params['wm_ones'] = self.ones
+        params['wm_zeros'] = self.zeros
+        return(WeightManager, (), params)
+    
+    def __setstate__(self, params):
+        self.ones = params['wm_ones']
+        self.zeros = params['wm_zeros']

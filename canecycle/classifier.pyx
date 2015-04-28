@@ -4,6 +4,7 @@
 #cython: cdivision=True
 #cython: nonecheck=False
 
+import cPickle
 import numpy as np
 cimport numpy as np
 from cpython cimport bool as c_bool
@@ -32,15 +33,20 @@ cdef class Classifier(object):
     cdef np.int_t holdout
     cdef np.uint64_t holdout_items_processed
     cdef np.uint64_t holdout_validation_index
-    cdef list progressive_validation_loss # optimizer loss
-    cdef np.float_t average_training_loss # optimizer loss
-    cdef np.float_t holdout_loss # lossfunc loss
+    cdef list progressive_validation_loss
+    cdef np.float_t average_training_loss
+    cdef np.float_t holdout_loss
     
     cdef c_bool display
     
+    cdef np.uint32_t save_period
+    cdef str save_path_prefix
+    cdef np.uint64_t max_iteration
+    
     def __cinit__(self, optimizer, LossFunction loss_function, WeightManager weight_manager,
             c_bool store_progressive_validation, np.int_t holdout, np.uint64_t pass_number,
-            c_bool display=False):
+            c_bool display=False, np.uint32_t save_period=None, str save_path_prefix=None,
+            np.uint64_t max_iteration=None):
         
         if pass_number < 0:
             raise ValueError("Negative number of passes.")
@@ -52,6 +58,9 @@ cdef class Classifier(object):
         self.holdout = holdout
         self.pass_number = pass_number
         self.display = display
+        self.save_period = save_period
+        self.save_path_prefix = save_path_prefix
+        self.max_iteration = max_iteration
     
     cdef np.int_t predict_item(self, Item item):
         return self.loss_function.get_decision(item, self.weights)
@@ -83,6 +92,19 @@ cdef class Classifier(object):
             self.holdout_loss += self.predict_proba_item(item)
             self.holdout_items_processed += 1
     
+    cdef void save_model(self):
+        #TODO(shiryaev): save as well optimizer, reader etc
+        with open(self.save_path_prefix+'classifier_'+str(self.items_processed), 'w+') as f:
+            cPickle.dump(self, f, protocol=2)
+        with open(self.save_path_prefix+'weight_manager_'+str(self.items_processed), 'w+') as f:
+            cPickle.dump(self.weight_manager, f, protocol=2)
+        with open(self.save_path_prefix+'loss_function'+str(self.items_processed), 'w+') as f:
+            cPickle.dump(self.loss_function, f, protocol=2)
+        # with open(self.save_path_prefix+'optimizer_'+str(self.items_processed), 'w+') as f:
+            # cPickle.dump(self.optimizer, f, protocol=2)
+        # with open(self.save_path_prefix+'reader_'+str(self.items_processed), 'w+') as f:
+            # cPickle.dump(self.reader, f, protocol=2)
+    
     cdef void run_train_pass(self, Reader reader) except *:
         cdef Item item
         for item in reader:
@@ -97,6 +119,14 @@ cdef class Classifier(object):
                         self.items_processed,
                         self.average_training_loss / self.items_processed,
                         self.predict_proba_item(item))
+            
+            if self.save_period != None or self.items_processed == self.max_iteration:
+                if self.items_processed % self.save_period == 0 and \
+                        self.items_processed != 0:
+                    self.save_model()
+                elif self.items_processed == self.max_iteration:
+                    self.save_model()
+                    return
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
             self.average_training_loss += self.predict_proba_item(item)
@@ -120,7 +150,8 @@ cdef class Classifier(object):
         cdef np.uint64_t pass_index
         for pass_index in range(self.pass_number):
             reader.restart(self.holdout)
-            self.run_train_pass(reader)
+            while self.items_processed < self.max_iteration:
+                self.run_train_pass(reader)
         
         self.average_training_loss /= self.items_processed
         
@@ -140,4 +171,39 @@ cdef class Classifier(object):
     
     cpdef np.float_t get_holdout_loss(self):
         return self.holdout_loss
-
+    
+    def __reduce__(self):
+        params = {}
+        params['clf_store_progressive_validation'] = self.store_progressive_validation
+        params['clf_pass_number'] = self.pass_number
+        params['clf_items_processed'] = self.items_processed
+        params['clf_training_validation_index'] = self.training_validation_index
+        params['clf_weights'] = self.weights
+        params['clf_holdout'] = self.holdout
+        params['clf_holdout_items_processed'] = self.holdout_items_processed
+        params['clf_holdout_validation_index'] = self.holdout_validation_index
+        params['clf_progressive_validation_loss'] = self.progressive_validation_loss
+        params['clf_average_training_loss'] = self.average_training_loss
+        params['clf_holdout_loss'] = self.holdout_loss
+        params['clf_display'] = self.display
+        params['clf_save_period'] = self.save_period
+        params['clf_save_path_prefix'] = self.save_path_prefix
+        params['clf_max_iteration'] = self.max_iteration
+        return(Classifier, (), params)
+    
+    def __setstate__(self, params):
+        self.store_progressive_validation = params['clf_store_progressive_validation']
+        self.pass_number = params['clf_pass_number']
+        self.items_processed = params['clf_items_processed']
+        self.training_validation_index = params['clf_training_validation_index']
+        self.weights = params['clf_weights']
+        self.holdout = params['clf_holdout']
+        self.holdout_items_processed = params['clf_holdout_items_processed']
+        self.holdout_validation_index = params['clf_holdout_validation_index']
+        self.progressive_validation_loss = params['clf_progressive_validation_loss']
+        self.average_training_loss = params['clf_average_training_loss']
+        self.holdout_loss = params['clf_holdout_loss']
+        self.display = params['clf_display']
+        self.save_period = params['clf_save_period']
+        self.save_path_prefix = params['clf_save_path_prefix']
+        self.max_iteration = params['clf_max_iteration']

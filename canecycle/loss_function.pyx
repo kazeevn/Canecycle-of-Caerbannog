@@ -43,6 +43,10 @@ cdef class LossFunction(object):
         cdef np.float_t sigmoid_values = self.get_loss(item, weights)
         cdef np.float_t label = float(item.label)
         return (sigmoid_values - label) * item.data
-
-
+    
+    def __reduce__(self):
+        return (LossFunction, (), {})
+    
+    def __setstate__(self, params):
+        pass
 
