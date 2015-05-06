@@ -37,9 +37,9 @@ def main():
     if args.passes <= 0:
         parser.error("--passes must be positive")
     loss_function = LossFunction()
-    optimizer = Optimizer(0, 0, 1e-5, 1, loss_function)
+    optimizer = Optimizer(0, 0, 2**args.hash_size, 1e-5, 1e-4, loss_function)
     classifier = Classifier(optimizer, loss_function, WeightManager(),
-                            args.progressive, args.holdout, args.passes)
+                            args.progressive, args.holdout, args.passes, display=True)
 
     reader = from_shad_lsml(args.learn, args.hash_size)
     classifier.fit(reader)

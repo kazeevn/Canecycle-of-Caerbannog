@@ -80,18 +80,6 @@ cdef class Classifier(object):
         for item in reader:
             yield self.predict_proba_item(item)
     
-    cdef void run_holdout_pass(self, Reader reader) except *:
-        cdef Item item
-        for item in reader:
-            if self.holdout_items_processed == self.holdout_validation_index - 1:
-                self.training_validation_index *= 2
-                print '{}\t{:.6}\t{:.6}'.format(
-                    self.holdout_items_processed,
-                    self.holdout_loss / self.holdout_items_processed,
-                    self.predict_proba_item(item))
-            self.holdout_loss += self.predict_proba_item(item)
-            self.holdout_items_processed += 1
-    
     cdef void save_model(self):
         #TODO(shiryaev): save as well optimizer, reader etc
         with open(self.save_path_prefix+'classifier_'+str(self.items_processed), 'w+') as f:
@@ -115,7 +103,7 @@ cdef class Classifier(object):
                     self.progressive_validation_loss.append(
                         self.predict_proba_item(item))
                 if self.display:
-                    print '{}\t{:.6}\t{:.6}'.format(
+                    print '{}\t\t{:.6}\t\t{:.6}'.format(
                         self.items_processed,
                         self.average_training_loss / self.items_processed,
                         self.predict_proba_item(item))
@@ -130,14 +118,26 @@ cdef class Classifier(object):
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
             self.average_training_loss += self.predict_proba_item(item)
-            self.weights = self.optimizer.step(item, self.items_processed, self.weights)
+            self.weights = self.optimizer.step(item, self.weights)
             self.items_processed += 1
+    
+    cdef void run_holdout_pass(self, Reader reader) except *:
+        cdef Item item
+        for item in reader:
+            if self.holdout_items_processed == self.holdout_validation_index - 1:
+                self.holdout_validation_index *= 2
+                print '{}\t\t{:.6}\t\t{:.6}'.format(
+                    self.holdout_items_processed,
+                    self.holdout_loss / self.holdout_items_processed,
+                    self.predict_proba_item(item))
+            self.holdout_loss += self.predict_proba_item(item)
+            self.holdout_items_processed += 1
     
     cpdef fit(self, Reader reader, c_bool continue_fitting=False):
         if self.display:
             print '{:-^50}'.format(' TRAINING ')
-            print '{} \t {} \t {}'.format('iteration', 'average', 'last')
-            print '{}\t{}\t{}'.format('number', 'loss', 'loss')
+            print '{}\t{}\t\t{}'.format('iteration', 'average', 'last')
+            print '{}\t\t{}\t\t{}'.format('number', 'loss', 'loss')
         if not continue_fitting:
             self.weights = np.ones(reader.get_features_count(), dtype=np.float_)     
             self.items_processed = 0
@@ -150,7 +150,7 @@ cdef class Classifier(object):
         cdef np.uint64_t pass_index
         for pass_index in range(self.pass_number):
             reader.restart(self.holdout)
-            while self.items_processed < self.max_iteration:
+            if self.items_processed < self.max_iteration:
                 self.run_train_pass(reader)
         
         self.average_training_loss /= self.items_processed
