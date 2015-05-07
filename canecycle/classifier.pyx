@@ -139,7 +139,7 @@ cdef class Classifier(object):
             print '{}\t{}\t\t{}'.format('iteration', 'average', 'last')
             print '{}\t\t{}\t\t{}'.format('number', 'loss', 'loss')
         if not continue_fitting:
-            self.weights = np.ones(reader.get_features_count(), dtype=np.float_)     
+            self.weights = np.zeros(reader.get_features_count(), dtype=np.float_)     
             self.items_processed = 0
             self.holdout_items_processed = 0
             self.training_validation_index = 1

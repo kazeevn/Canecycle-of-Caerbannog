@@ -34,10 +34,6 @@ cdef class LossFunction(object):
                                    np.ndarray[np.float_t, ndim=1] weights):
         cdef np.int_t label = int(item.label)
         cdef np.float_t prediction = self.get_proba(item, weights)
-        if prediction < 1e-5:
-            prediction = 1e-5
-        if prediction > 1 - 1e-5:
-            prediction = 1 - 1e-5
         cdef np.float_t loss
         loss = -np.log(prediction) if label == 1 else -np.log(1. - prediction)
         return loss
