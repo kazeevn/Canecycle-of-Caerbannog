@@ -60,11 +60,7 @@ cdef class LossFunction(object):
          np.ndarray[np.float_t, ndim=1] weights):
         cdef np.float_t sigmoid_values = self.get_loss(item, weights)
         cdef np.float_t label = float(item.label)
-        try:
-            return (sigmoid_values - label) * item.data
-        except:
-            print sigmoid_values
-            raise
+        return (sigmoid_values - label) * item.data
     
     def __reduce__(self):
         return (LossFunction, (), {})
