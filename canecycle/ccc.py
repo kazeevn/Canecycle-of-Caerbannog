@@ -43,6 +43,8 @@ def main():
                         help="FTRL beta")
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument("--discard-numeric", action="store_true",
+                        help="Discard numeric features")
     
     args = parser.parse_args()
     if args.debug:
@@ -59,8 +61,10 @@ def main():
             parser.error("Hash size must be specified if reading from"
                          " text file")
         hash_size = args.hash_size
-        source = from_shad_lsml(args.learn, hash_size)
+        source = from_shad_lsml(args.learn, hash_size, args.discard_numeric)
     else:
+        if args.discard_numeric:
+            parser.error("Can't skip numerics in cache files")
         source = CacheReader(args.cache)
         if args.hash_size and args.hash_size != source.get_hash_size():
             parser.error("Specified hash size differs from one in the"
@@ -81,7 +85,8 @@ def main():
     # TODO(kazeevn) add progressive_validation
     
     if args.predict:
-        predict_file = from_shad_lsml(args.predict, args.hash_size)
+        predict_file = from_shad_lsml(
+            args.predict, args.hash_size, args.discard_numeric)
         output_file = open(args.output, 'w')
         for prediction in classifier.predict_proba(predict_file):
             output_file.write("%g\n" % prediction)
