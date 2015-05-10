@@ -96,9 +96,12 @@ cdef class Classifier(object):
         cdef Item item
         for item in reader:
             # validation routine
+            item_loss = self.loss_function.get_loss(item, self.weights)
+            self.average_training_loss += item_loss
+
             if self.items_processed == self.training_validation_index - 1:
                 self.training_validation_index *= 2
-                item_loss = self.loss_function.get_loss(item, self.weights)
+
                 if self.store_progressive_validation:
                     self.progressive_validation_loss.append(item_loss)
                 if self.display:
@@ -116,7 +119,6 @@ cdef class Classifier(object):
                     return
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
-            self.average_training_loss += self.loss_function.get_loss(item, self.weights)
             self.weights = self.optimizer.step(item, self.weights)
             self.items_processed += 1
     
