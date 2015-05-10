@@ -102,10 +102,10 @@ cdef class Classifier(object):
                 if self.store_progressive_validation:
                     self.progressive_validation_loss.append(item_loss)
                 if self.display:
-                    print '{}\t\t{:.6}\t\t{:.6}'.format(
+                    print ('%15d %15.6e %15.6e' % (
                         self.items_processed,
                         self.average_training_loss / self.items_processed,
-                        item_loss)
+                        item_loss))
             
             if self.save_period != 0 or self.items_processed == self.max_iteration:
                 if self.items_processed % self.save_period == 0 and \
@@ -125,18 +125,19 @@ cdef class Classifier(object):
         for item in reader:
             if self.holdout_items_processed == self.holdout_validation_index - 1:
                 self.holdout_validation_index *= 2
-                print '{}\t\t{:.6}\t\t{:.6}'.format(
-                    self.holdout_items_processed,
-                    self.holdout_loss / self.holdout_items_processed,
-                    self.predict_proba_item(item))
+                if self.display:
+                    print ('%15d %15.6e %15.6e' % (
+                        self.holdout_items_processed,
+                        self.holdout_loss / self.holdout_items_processed,
+                        self.predict_proba_item(item)))
             self.holdout_loss += self.loss_function.get_loss(item, self.weights)
             self.holdout_items_processed += 1
     
     cpdef fit(self, Source reader, c_bool continue_fitting=False):
         if self.display:
             print '{:-^50}'.format(' TRAINING ')
-            print '{}\t{}\t\t{}'.format('iteration', 'average', 'last')
-            print '{}\t\t{}\t\t{}'.format('number', 'loss', 'loss')
+            print ('%15s %15s %15s' % ('iteration', 'average', 'last'))
+            print ('%15s %15s %15s' % ('number', 'loss', 'loss'))
         if not continue_fitting:
             self.weights = np.zeros(reader.get_features_count(), dtype=np.float_)     
             self.items_processed = 0
