@@ -8,20 +8,18 @@
 from canecycle.item cimport Item
 import numpy as np
 cimport numpy as np
+from itertools import izip
 
 
 cdef class LossFunction(object):
 
     cpdef np.float_t get_proba(self, Item item, 
-                                 np.ndarray[np.float_t, ndim=1] weights):
-        cdef np.ndarray[numpy.uint64_t, ndim=1] features_indices = item.indexes
-        cdef np.ndarray[np.float_t, ndim=1] features_values = item.data
+                               np.ndarray[np.float_t, ndim=1] weights):
         cdef np.float_t feature_value, dot_product
         cdef np.uint64_t index
-        
-        dot_product = 0.0
-        for index, feature_value in enumerate(features_values):
-            dot_product += feature_value * weights[features_indices[index]]
+        dot_product = 0
+        for index, feature_value in izip(item.indexes, item.data):
+            dot_product += feature_value * weights[index]
         return 1. / (1. + np.exp(-dot_product))
 
 

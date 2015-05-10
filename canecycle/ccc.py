@@ -7,6 +7,7 @@ from canecycle.weight_manager import WeightManager
 from canecycle.optimizer import Optimizer
 from canecycle.loss_function import LossFunction
 from canecycle.cache import CacheReader
+import numpy
 
 def check_negative(value):
     int_value = int(value)
@@ -41,7 +42,13 @@ def main():
     parser.add_argument("--beta", type=float, default=1e-4,
                         help="FTRL beta")
     parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("-d", "--debug", action="store_true")
+    
     args = parser.parse_args()
+    if args.debug:
+        args.verbose = True
+        numpy.seterr(invalid='raise')
+    
     if args.predict and not args.output:
         parser.error("--predict requires --output")
     if args.passes <= 0:
