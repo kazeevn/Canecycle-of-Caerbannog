@@ -6,6 +6,7 @@ from canecycle.classifier import Classifier
 from canecycle.weight_manager import WeightManager
 from canecycle.optimizer import Optimizer
 from canecycle.loss_function import LossFunction
+from canecycle.cache import CacheReader
 
 def check_negative(value):
     int_value = int(value)
@@ -15,12 +16,15 @@ def check_negative(value):
 
 def main():
     parser = argparse.ArgumentParser(description="An FTRL-based online learning machine")
-    parser.add_argument("-l", "--learn", type=str, required=True,
+    input_ = parser.add_mutually_exclusive_group(required=True)
+    input_.add_argument("-l", "--learn", type=str,
                         help="Input file for training in SHAD-LSML format")
+    input_.add_argument("-c", "--cache", type=str,
+                        help="Read input from the cache file")
     parser.add_argument("-H", "--holdout", type=check_negative, default=0,
                         help="Each h-th line is not used for learning. After learning, "
                         "the average loss over h-th lines is calculated")
-    parser.add_argument("-b", "--hash-size", type=int, required=True,
+    parser.add_argument("-b", "--hash-size", type=int,
                         help="Hash table size in bits")
     parser.add_argument("--progressive", action="store_true",
                         help="Enables output of progressive validation")
@@ -30,19 +34,41 @@ def main():
         help="Input files for prediction in SHAD-LSML format")
     parser.add_argument("-o", "--output", type=str,
         help="File to write the predictions into")
-
+    parser.add_argument("--l1", type=float, default=0)
+    parser.add_argument("--l2", type=float, default=1)
+    parser.add_argument("--alpha", type=float, default=1e-5,
+                        help="FTRL alpha")
+    parser.add_argument("--beta", type=float, default=1e-4,
+                        help="FTRL beta")
+    parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
     if args.predict and not args.output:
         parser.error("--predict requires --output")
     if args.passes <= 0:
         parser.error("--passes must be positive")
     loss_function = LossFunction()
-    optimizer = Optimizer(0, 0, 2**args.hash_size, 1e-5, 1e-4, loss_function)
-    classifier = Classifier(optimizer, loss_function, WeightManager(),
-                            args.progressive, args.holdout, args.passes, display=True)
+    if args.learn:
+        if not args.hash_size:
+            parser.error("Hash size must be specified if reading from"
+                         " text file")
+        hash_size = args.hash_size
+        source = from_shad_lsml(args.learn, hash_size)
+    else:
+        source = CacheReader(args.cache)
+        if args.hash_size and args.hash_size != source.get_hash_size():
+            parser.error("Specified hash size differs from one in the"
+                         " cache file")
+        hash_size = source.get_hash_size()
 
-    reader = from_shad_lsml(args.learn, args.hash_size)
-    classifier.fit(reader)
+    optimizer = Optimizer(args.l1, args.l2, 2**hash_size, args.alpha,
+                          args.beta, loss_function)
+    classifier = Classifier(optimizer, loss_function, WeightManager(),
+                            args.progressive, args.holdout, args.passes,
+                            display=args.verbose)
+
+    
+    classifier.fit(source)
+    source.close()
     if args.holdout != 0:
         print("Average holdout loss: %f" % classifier.get_holdout_loss())
     # TODO(kazeevn) add progressive_validation

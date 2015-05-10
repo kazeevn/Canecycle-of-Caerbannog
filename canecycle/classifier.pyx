@@ -10,7 +10,7 @@ cimport numpy as np
 from cpython cimport bool as c_bool
 
 from canecycle.item cimport Item
-from canecycle.reader cimport Reader
+from canecycle.source cimport Source
 from canecycle.weight_manager cimport WeightManager
 from canecycle.loss_function cimport LossFunction
 
@@ -68,13 +68,13 @@ cdef class Classifier(object):
     cdef np.float_t predict_proba_item(self, Item item) except *:
         return self.loss_function.get_loss(item, self.weights)
     
-    def predict(self, Reader reader):
+    def predict(self, Source reader):
         cdef Item item
         reader.restart(0)
         for item in reader:
             yield self.predict_item(item)
     
-    def predict_proba(self, Reader reader):
+    def predict_proba(self, Source reader):
         cdef Item item
         reader.restart(0)
         for item in reader:
@@ -93,7 +93,7 @@ cdef class Classifier(object):
         # with open(self.save_path_prefix+'reader_'+str(self.items_processed), 'w+') as f:
             # cPickle.dump(self.reader, f, protocol=2)
     
-    cdef void run_train_pass(self, Reader reader) except *:
+    cdef void run_train_pass(self, Source reader) except *:
         cdef Item item
         for item in reader:
             # validation routine
@@ -121,7 +121,7 @@ cdef class Classifier(object):
             self.weights = self.optimizer.step(item, self.weights)
             self.items_processed += 1
     
-    cdef void run_holdout_pass(self, Reader reader) except *:
+    cdef void run_holdout_pass(self, Source reader) except *:
         cdef Item item
         for item in reader:
             if self.holdout_items_processed == self.holdout_validation_index - 1:
@@ -133,7 +133,7 @@ cdef class Classifier(object):
             self.holdout_loss += self.predict_proba_item(item)
             self.holdout_items_processed += 1
     
-    cpdef fit(self, Reader reader, c_bool continue_fitting=False):
+    cpdef fit(self, Source reader, c_bool continue_fitting=False):
         if self.display:
             print '{:-^50}'.format(' TRAINING ')
             print '{}\t{}\t\t{}'.format('iteration', 'average', 'last')

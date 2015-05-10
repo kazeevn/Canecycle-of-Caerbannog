@@ -17,7 +17,7 @@ class TestReader(unittest.TestCase):
         parser = Parser(hash_function, format_)
         reader = Reader(self.test_file, parser, skip=1)
         with self.assertRaises(NotInitialized):
-            next(reader)
+            next(reader.__iter__())
     
 
     def test_holdout_count(self):
@@ -33,6 +33,8 @@ class TestReader(unittest.TestCase):
         self.assertEqual(sum(imap(lambda item: 1, reader)), 500)
         reader.restart(1)
         self.assertEqual(sum(imap(lambda item: 1, reader)), 0)
+        reader.restart(4)
+        self.assertEqual(sum(imap(lambda item: 1, reader)), 750)
         reader.restart(-1)
         self.assertEqual(sum(imap(lambda item: 1, reader)), 1000)
         reader.restart(13)

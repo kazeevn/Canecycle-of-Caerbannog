@@ -1,7 +1,7 @@
 import os.path
 from unittest import TestCase
 from tempfile import NamedTemporaryFile
-from itertools import izip
+from itertools import izip, imap
 import numpy
 
 from canecycle.reader import from_shad_lsml
@@ -22,12 +22,45 @@ class TestReader(TestCase):
             cache_writer.write_item(item)
         cache_writer.close()
         
-        reader.restart(0)
+        reader.restart(3)
         cache_reader = CacheReader(cache_file)
+        cache_reader.restart(3)
         self.assertEqual(hash_size, cache_reader.get_hash_size())
         for read_item, cached_item in izip(reader, cache_reader):
             self.assertEqual(read_item.label, cached_item.label)
             self.assertEqual(read_item.weight, cached_item.weight)
-            numpy.testing.assert_array_equal(read_item.data, cached_item.data)
-            numpy.testing.assert_array_equal(read_item.indexes, cached_item.indexes)
-        cache_reader.close()
+            numpy.testing.assert_array_equal(
+                read_item.data, cached_item.data)
+            numpy.testing.assert_array_equal(
+                read_item.indexes, cached_item.indexes)
+
+        reader.restart(-3)
+        cache_reader.restart(-3)
+        for read_item, cached_item in izip(reader, cache_reader):
+            self.assertEqual(read_item.label, cached_item.label)
+            self.assertEqual(read_item.weight, cached_item.weight)
+            numpy.testing.assert_array_equal(
+                read_item.data, cached_item.data)
+            numpy.testing.assert_array_equal(
+                read_item.indexes, cached_item.indexes)
+
+        reader.close()
+        cache_reader.restart(-4)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 250)
+        cache_reader.restart(-2)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 500)
+        cache_reader.restart(-100)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 10)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 0)
+
+        cache_reader.restart(4)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 750)
+        cache_reader.restart(2)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 500)
+        cache_reader.restart(100)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 990)
+        self.assertEqual(sum(imap(lambda item: 1, cache_reader)), 0)
+
+
+
+        

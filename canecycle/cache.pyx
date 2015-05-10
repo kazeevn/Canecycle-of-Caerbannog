@@ -5,6 +5,8 @@ import numpy
 from canecycle.item cimport Item
 from canecycle.source cimport Source
 from itertools import imap
+from cpython cimport bool
+from canecycle.source import dropping_iterator
 
 
 cdef class CacheWriter(object):
@@ -61,20 +63,34 @@ cdef class CacheWriter(object):
     cpdef close(self):
         self.file.close()
 
+    
 
 cdef class CacheReader(Source):
     cdef object table
     cdef object file
-
     
     def __cinit__(self, filename):
         cdef object file_
         self.file = tables.open_file(filename)
         self.table = self.file.get_node(self.file.root, 'items_table')
+        self.is_ready = False
 
+    cpdef restart(self, numpy.int64_t holdout):
+        self.holdout = holdout
+        if holdout > 0:
+            self.iterator = imap(
+                self.unpack_item,
+                dropping_iterator(self.table.iterrows(), holdout)
+            )
+        elif holdout < 0:
+            self.iterator = imap(
+                self.unpack_item, self.table.iterrows(step=-holdout)
+            )
+        else:
+            self.iterator = imap(
+                self.unpack_item, self.table.iterrows())
 
-    def __iter__(self):
-        return imap(self.unpack_item, self.table.iterrows()).__iter__()
+        self.is_ready = True
 
     
     cpdef Item unpack_item(self, object row):
@@ -88,12 +104,14 @@ cdef class CacheReader(Source):
         item.data.resize(features_count)
         item.indexes.resize(features_count)
         return item
-
     
     cpdef close(self):
         self.file.close()
-        
 
     cpdef numpy.uint64_t get_hash_size(self):
-        cdef object metadata_table = self.file.get_node(self.file.root, 'metadata_table')
+        cdef object metadata_table = \
+            self.file.get_node(self.file.root, 'metadata_table')
         return metadata_table[0]['hash_size']
+
+    cpdef numpy.uint64_t get_features_count(self):
+        return 2**self.get_hash_size()
