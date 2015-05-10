@@ -52,7 +52,7 @@ class LossFunctionTest(unittest.TestCase):
             loss.get_proba(item, weights), 1.0)
         item.label = 1
         self.assertEqual(
-            loss.get_loss(item, weights), 2e-6) 
+            loss.get_loss(item, weights), 0) 
 
 if __name__ == '__main__':
     unittest.main()

@@ -37,7 +37,7 @@ cdef class LossFunction(object):
 
 
     cpdef np.float_t get_proba(self, Item item, 
-                               np.ndarray[np.float_t, ndim=1] weights) except *:
+                               np.ndarray[np.float_t, ndim=1] weights):
         cdef np.float_t dot_product = np.dot(
             item.data, weights[item.indexes])
         return 1. / (1. + np.exp(-dot_product))
