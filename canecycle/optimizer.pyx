@@ -44,7 +44,7 @@ cdef class Optimizer(object):
                 weights[index_in_vector] += self.l2Regularization
                 weights[index_in_vector] = -1. / weights[index_in_vector]
                 weights[index_in_vector] *= (self.z[index_in_vector] - 
-                                 np.sign(self.z[index_in_vector]) * self.l2Regularization)
+                                 np.sign(self.z[index_in_vector]) * self.l1Regularization)
         cdef np.ndarray[np.float_t, ndim=1] gradient = self.loss_function.get_gradient(item, weights)
         cdef np.ndarray[np.float_t, ndim=1] sigma = np.sqrt(self.n[non_zero_indices] + gradient ** 2)
         sigma -= np.sqrt(self.n[non_zero_indices])
