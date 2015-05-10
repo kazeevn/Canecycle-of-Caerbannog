@@ -71,7 +71,7 @@ cdef class CacheReader(Source):
     def __cinit__(self, filename):
         cdef object file_
         self.file = tables.open_file(filename)
-        self.table = self.file.get_node(self.file.root, 'items_table')
+        self.table = self.file.root.items_table
         self.is_ready = False
 
     cpdef restart(self, numpy.int64_t holdout):
@@ -109,7 +109,7 @@ cdef class CacheReader(Source):
 
     cpdef numpy.uint64_t get_hash_size(self):
         cdef object metadata_table = \
-            self.file.get_node(self.file.root, 'metadata_table')
+            self.file.root.metadata_table
         return metadata_table[0]['hash_size']
 
     cpdef numpy.uint64_t get_features_count(self):
