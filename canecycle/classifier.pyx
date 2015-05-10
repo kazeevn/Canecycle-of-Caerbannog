@@ -65,7 +65,7 @@ cdef class Classifier(object):
     cdef np.int_t predict_item(self, Item item):
         return self.loss_function.get_decision(item, self.weights)
     
-    cdef np.float_t predict_proba_item(self, Item item) except *:
+    cdef np.float_t predict_proba_item(self, Item item):
         return self.loss_function.get_loss(item, self.weights)
     
     def predict(self, Source reader):
@@ -99,14 +99,14 @@ cdef class Classifier(object):
             # validation routine
             if self.items_processed == self.training_validation_index - 1:
                 self.training_validation_index *= 2
+                item_loss = self.loss_function.get_loss(item, self.weights)
                 if self.store_progressive_validation:
-                    self.progressive_validation_loss.append(
-                        self.predict_proba_item(item))
+                    self.progressive_validation_loss.append(item_loss)
                 if self.display:
                     print '{}\t\t{:.6}\t\t{:.6}'.format(
                         self.items_processed,
                         self.average_training_loss / self.items_processed,
-                        self.predict_proba_item(item))
+                        item_loss)
             
             if self.save_period != 0 or self.items_processed == self.max_iteration:
                 if self.items_processed % self.save_period == 0 and \
@@ -117,7 +117,7 @@ cdef class Classifier(object):
                     return
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
-            self.average_training_loss += self.predict_proba_item(item)
+            self.average_training_loss += self.loss_function.get_loss(item, self.weigths)
             self.weights = self.optimizer.step(item, self.weights)
             self.items_processed += 1
     
