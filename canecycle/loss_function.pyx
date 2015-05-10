@@ -46,8 +46,7 @@ cdef class LossFunction(object):
     cpdef np.int_t get_decision(
         self, Item item, np.ndarray[np.float_t, ndim=1] weights):
         
-        cdef np.float_t loss = self.get_loss(item, weights)
-        return loss > 0.5
+        return self.get_loss(item, weights) > 0.5
 
 
     cpdef np.float_t get_loss(self, Item item,

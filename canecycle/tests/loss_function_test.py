@@ -12,6 +12,12 @@ class LossFunctionTest(unittest.TestCase):
         loss = LossFunction()
         self.assertAlmostEqual(
             loss.get_proba(item, weights), 1./(1. + np.exp(-2)))
+        self.assertAlmostEqual(
+            loss.get_log_proba(item, weights), np.log(1./(1. + np.exp(-2))))
+        self.assertAlmostEqual(
+            loss.get_log_one_minus_proba(item, weights), np.log(1 - 1./(1. + np.exp(-2))))
+
+
 
     def test_predict_loss(self):
         item = Item()
