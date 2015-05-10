@@ -19,9 +19,9 @@ cdef class LossFunction(object):
             item.data, weights[item.indexes])
         # http://lingpipe-blog.com/2009/06/25/log-sum-of-exponentials/
         if dot_product < 0:
-            return dot_product - np.log(1. + np.exp(dot_product))
+            return dot_product - np.logaddexp(0., dot_product)
         else:
-            return -np.log(1. + np.exp(-dot_product))
+            return -np.logaddexp(0., -dot_product)
 
     cpdef np.float_t get_log_one_minus_proba(
         self, Item item,
@@ -31,9 +31,9 @@ cdef class LossFunction(object):
             item.data, weights[item.indexes])
         # http://lingpipe-blog.com/2009/06/25/log-sum-of-exponentials/
         if dot_product > 0:
-            return -dot_product - np.log(1. + np.exp(-dot_product))
+            return -dot_product - np.logaddexp(0, -dot_product)
         else:
-            return -np.log(1. + np.exp(dot_product))
+            return -np.logaddexp(0.,dot_product)
 
 
     cpdef np.float_t get_proba(self, Item item, 
