@@ -47,7 +47,7 @@ def main():
     args = parser.parse_args()
     if args.debug:
         args.verbose = True
-        numpy.seterr(invalid='raise')
+        numpy.seterr(invalid='raise', over='raise')
     
     if args.predict and not args.output:
         parser.error("--predict requires --output")
