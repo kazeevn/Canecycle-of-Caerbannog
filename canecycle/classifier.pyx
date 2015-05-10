@@ -130,7 +130,7 @@ cdef class Classifier(object):
                     self.holdout_items_processed,
                     self.holdout_loss / self.holdout_items_processed,
                     self.predict_proba_item(item))
-            self.holdout_loss += self.predict_proba_item(item)
+            self.holdout_loss += self.loss_fucntion.get_loss(item, self.weights)
             self.holdout_items_processed += 1
     
     cpdef fit(self, Source reader, c_bool continue_fitting=False):
