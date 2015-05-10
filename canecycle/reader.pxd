@@ -1,9 +1,8 @@
+from cpython cimport bool
 from canecycle.source cimport Source
 from canecycle.parser cimport Parser
 from canecycle.parser import read_shad_lsml_header
 from numpy cimport uint64_t
-
-cpdef Reader from_shad_lsml(str filename, uint64_t hash_size)
 
 cdef class Reader(Source):
     cdef object file

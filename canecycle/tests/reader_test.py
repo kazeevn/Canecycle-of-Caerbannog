@@ -48,3 +48,8 @@ class TestReader(unittest.TestCase):
         reader.restart(0)
         self.assertEqual(sum(imap(lambda item: 1, reader)), 1000)
         self.assertEqual(reader.get_features_count(), 2**3)
+
+    def test_numeric_discard(self):
+        reader = from_shad_lsml(self.test_file, 25, True)
+        reader.restart(0)
+        self.assertEqual(reader.get_feature_columns_count(), 37)

@@ -1,18 +1,28 @@
 # cython: profile=True
 from canecycle.source import NotInitialized, dropping_iterator
-from canecycle.parser import read_shad_lsml_header
+from canecycle.parser import (
+    read_shad_lsml_header,
+    ValueType_numerical,
+    ValueType_skip)
 from canecycle.hash_function cimport HashFunction
 from canecycle.item cimport Item
 from canecycle.item import Item
 from itertools import imap
+from canecycle.parser cimport Parser
 cimport numpy as np
 
 # Should be @staticmethod, but Cython doesn't support it in cpdef
-cpdef Reader from_shad_lsml(str filename, uint64_t hash_size):
+# Should be cpdef, but Cython doesn't support closures
+def from_shad_lsml(str filename, uint64_t hash_size, discard_numeric=False):
     cdef list format
     cdef Parser parser
     cdef Reader reader
     format_ = read_shad_lsml_header(filename)
+    if discard_numeric:
+        format_ = map(
+            lambda item_format: ValueType_skip if
+            item_format == ValueType_numerical else item_format,
+            format_)
     hash_function = HashFunction(hash_size)
     parser = Parser(hash_function, format_)
     reader = Reader(filename, parser, 1)
