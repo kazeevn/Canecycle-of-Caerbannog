@@ -117,7 +117,7 @@ cdef class Classifier(object):
                     return
             
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
-            self.average_training_loss += self.loss_function.get_loss(item, self.weigths)
+            self.average_training_loss += self.loss_function.get_loss(item, self.weights)
             self.weights = self.optimizer.step(item, self.weights)
             self.items_processed += 1
     
