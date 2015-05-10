@@ -36,7 +36,7 @@ cdef class Optimizer(object):
         cdef np.ndarray[np.float_t, ndim=1] non_zero_values = item.data
         cdef np.uint64_t index, index_in_vector
         for index, index_in_vector in enumerate(non_zero_indices):
-            if abs(self.z[index_in_vector]) < self.l1Regularization:
+            if abs(self.z[index_in_vector]) <= self.l1Regularization:
                 weights[index_in_vector] = 0.0
             else:
                 weights[index_in_vector] = self.betta + np.sqrt(self.n[index_in_vector])
