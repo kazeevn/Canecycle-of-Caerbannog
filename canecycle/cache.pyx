@@ -1,4 +1,3 @@
-# cython: profile=True
 import tables
 cimport numpy
 import numpy
