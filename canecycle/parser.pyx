@@ -78,6 +78,7 @@ cdef class Parser(object):
         item = Item()
         item.indexes = np.ndarray(self.feature_columns_count, dtype=np.uint64)
         item.data = np.ndarray(self.feature_columns_count, dtype=np.float_)
+        index = 0
         for item_format, readout, column_name, hash in \
             izip(self.format, processed_line, self.column_names, self.numeric_hashes):
             if readout == '':
