@@ -1,5 +1,6 @@
 cimport numpy as np
 
+
 class NotInitialized(BaseException):
     pass
 

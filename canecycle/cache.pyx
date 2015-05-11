@@ -1,19 +1,16 @@
 import tables
-cimport numpy
-import numpy
+cimport numpy as np
+import numpy as np
+from itertools import imap
+
 from canecycle.item cimport Item
 from canecycle.source cimport Source
-from itertools import imap
-from cpython cimport bool
 from canecycle.source import dropping_iterator
 
 
 cdef class CacheWriter(object):
     def __cinit__(self, max_feature_columns_count, hash_size):
         self.max_feature_columns_count = max_feature_columns_count
-        # We serialize into
-        # int_t Label, float_t weight, uint64_t[max_feature_columns_count] indexes,
-        # float_t[max_feature_columns_count] data
         self.struct_mapping = [
             ('label', 'int_'),
             ('weight', 'float_'),
@@ -25,24 +22,24 @@ cdef class CacheWriter(object):
 
     cpdef open(self, filename):
         cdef tuple table_description
-        cdef numpy.ndarray mapped_item
-        cdef numpy.ndarray metadata
+        cdef np.ndarray mapped_item
+        cdef np.ndarray metadata
         cdef object metadata_table
         cdef object filters
 
         filters = tables.Filters(complib='blosc', complevel=6)
         self.file = tables.open_file(filename, mode='w', chunkshape=(10000, 1), filters=filters)
         self.objects_written = 0
-        mapped_item = numpy.ndarray(0, dtype=self.struct_mapping)
-        metadata = numpy.ndarray((1, ), dtype=[('hash_size', 'uint64'),])
+        mapped_item = np.ndarray(0, dtype=self.struct_mapping)
+        metadata = np.ndarray((1, ), dtype=[('hash_size', 'uint64'),])
         metadata['hash_size'][0] = self.hash_size
         self.table = self.file.create_table(self.file.root, 'items_table',  mapped_item)
         metadata_table = self.file.create_table(self.file.root, 'metadata_table', metadata)
         metadata_table.close()
 
     cpdef write_item(self, Item item):
-        cdef numpy.uint64_t features_count
-        mapped_item = numpy.ndarray(1, dtype=self.struct_mapping)
+        cdef np.uint64_t features_count
+        mapped_item = np.ndarray(1, dtype=self.struct_mapping)
         mapped_item['label'] = item.label
         mapped_item['weight'] = item.weight
         features_count =  len(item.indexes)
@@ -53,7 +50,6 @@ cdef class CacheWriter(object):
         
     cpdef close(self):
         self.file.close()
-
     
 
 cdef class CacheReader(Source):
@@ -66,7 +62,7 @@ cdef class CacheReader(Source):
         self.table = self.file.root.items_table
         self.is_ready = False
 
-    cpdef restart(self, numpy.int64_t holdout):
+    cpdef restart(self, np.int_t holdout):
         self.holdout = holdout
         if holdout > 0:
             self.iterator = imap(
@@ -82,10 +78,9 @@ cdef class CacheReader(Source):
                 self.unpack_item, self.table.iterrows())
 
         self.is_ready = True
-
     
     cpdef Item unpack_item(self, object row):
-        cdef numpy.uint64_t features_count
+        cdef np.uint64_t features_count
         item = Item()
         item.label = row['label']
         item.weight = row['weight']
@@ -99,10 +94,8 @@ cdef class CacheReader(Source):
     cpdef close(self):
         self.file.close()
 
-    cpdef numpy.uint64_t get_hash_size(self):
-        cdef object metadata_table = \
-            self.file.root.metadata_table
-        return metadata_table[0]['hash_size']
+    cpdef np.uint64_t get_hash_size(self):
+        return self.file.root.metadata_table[0]['hash_size']
 
-    cpdef numpy.uint64_t get_features_count(self):
+    cpdef np.uint64_t get_features_count(self):
         return self.get_hash_size()

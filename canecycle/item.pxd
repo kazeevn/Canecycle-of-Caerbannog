@@ -1,7 +1,8 @@
-from numpy cimport ndarray, int_t, float_t
+cimport numpy as np
 
-cdef class Item:
-    cdef public int_t label
-    cdef public float_t weight
-    cdef public ndarray indexes
-    cdef public ndarray data
+
+cdef class Item(object):
+    cdef public np.int_t label
+    cdef public np.float_t weight
+    cdef public np.ndarray indexes
+    cdef public np.ndarray data
