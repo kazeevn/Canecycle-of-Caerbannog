@@ -11,8 +11,6 @@ class LossFunctionTest(unittest.TestCase):
         weights = np.array([1., 1.])
         loss = LossFunction()
         self.assertAlmostEqual(
-            loss.get_proba(item, weights), 1./(1. + np.exp(-2)))
-        self.assertAlmostEqual(
             loss.get_log_proba(item, weights), np.log(1./(1. + np.exp(-2))))
         self.assertAlmostEqual(
             loss.get_log_one_minus_proba(item, weights), np.log(1 - 1./(1. + np.exp(-2))))
@@ -40,8 +38,6 @@ class LossFunctionTest(unittest.TestCase):
             loss.get_loss(item, weights), 2e10) 
         self.assertAlmostEqual(
             loss.get_log_proba(item, weights), -2e10) 
-        self.assertAlmostEqual(
-            loss.get_proba(item, weights), 0.0) 
 
     def test_proba_overflow(self):
         item = Item()
@@ -54,8 +50,6 @@ class LossFunctionTest(unittest.TestCase):
             loss.get_loss(item, weights), 2e6) 
         self.assertAlmostEqual(
             loss.get_log_one_minus_proba(item, weights), -2e6) 
-        self.assertAlmostEqual(
-            loss.get_proba(item, weights), 1.0)
         item.label = 1
         self.assertEqual(
             loss.get_loss(item, weights), 0) 

@@ -14,11 +14,11 @@ class TestParser(unittest.TestCase):
     def test_header_readout(self):
         header = read_shad_lsml_header(self.test_file)
         self.assertEqual(len(header), 1 + 37 + 23)
-        self.assertEqual(header[0], canecycle.parser.ValueType_label)
+        self.assertEqual(header[0], canecycle.parser.VALUETYPE_LABEL)
         for header_type in header[1:37]:
-            self.assertEqual(header_type, canecycle.parser.ValueType_categorical)
+            self.assertEqual(header_type, canecycle.parser.VALUETYPE_CATEGORICAL)
         for header_type in header[38:]:
-            self.assertEqual(header_type, canecycle.parser.ValueType_numerical)
+            self.assertEqual(header_type, canecycle.parser.VALUETYPE_NUMERICAL)
 
     def test_parse(self):
         format_ = read_shad_lsml_header(self.test_file)

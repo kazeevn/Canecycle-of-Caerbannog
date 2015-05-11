@@ -17,10 +17,10 @@ def name_iterator():
         i += 1
 
 
-cdef np.int_t VALUETYPE_LABEL = 0
-cdef np.int_t VALUETYPE_CATEGORICAL = 1
-cdef np.int_t VALUETYPE_NUMERICAL = 2
-cdef np.int_t VALUETYPE_SKIP = 3
+VALUETYPE_LABEL = 0
+VALUETYPE_CATEGORICAL = 1
+VALUETYPE_NUMERICAL = 2
+VALUETYPE_SKIP = 3
 
 
 def transform_header(header_item):

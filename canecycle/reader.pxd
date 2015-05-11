@@ -3,7 +3,6 @@ cimport numpy as np
 
 from canecycle.source cimport Source
 from canecycle.parser cimport Parser
-from canecycle.parser import read_shad_lsml_header
 from canecycle.cache cimport CacheWriter
 
 

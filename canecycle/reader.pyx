@@ -3,10 +3,7 @@ cimport numpy as np
 from cpython cimport bool
 
 from canecycle.source import NotInitialized, dropping_iterator
-from canecycle.parser import (
-    read_shad_lsml_header,
-    VALUETYPE_NUMERICAL,
-    VALUETYPE_SKIP)
+from canecycle.parser import read_shad_lsml_header, VALUETYPE_NUMERICAL, VALUETYPE_SKIP
 from canecycle.hash_function cimport HashFunction
 from canecycle.item cimport Item
 from canecycle.item import Item
