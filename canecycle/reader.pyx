@@ -1,4 +1,3 @@
-# cython: profile=True
 from canecycle.source import NotInitialized, dropping_iterator
 from canecycle.parser import (
     read_shad_lsml_header,

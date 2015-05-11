@@ -42,10 +42,12 @@ cdef class Classifier(object):
     cdef str save_path_prefix
     cdef np.uint64_t max_iteration
     
+    cdef c_bool use_cache
+    
     def __cinit__(self, optimizer, LossFunction loss_function, WeightManager weight_manager,
             c_bool store_progressive_validation, np.int_t holdout, np.uint64_t pass_number,
             c_bool display=False, np.uint32_t save_period=0, str save_path_prefix='',
-                  np.uint64_t max_iteration=1000000000):
+                  np.uint64_t max_iteration=1000000000, c_bool use_cache=False):
         
         if pass_number < 0:
             raise ValueError("Negative number of passes.")
@@ -60,6 +62,7 @@ cdef class Classifier(object):
         self.save_period = save_period
         self.save_path_prefix = save_path_prefix
         self.max_iteration = max_iteration
+        self.use_cache=use_cache
     
     cdef np.int_t predict_item(self, Item item):
         return self.loss_function.get_decision(item, self.weights)
@@ -151,7 +154,13 @@ cdef class Classifier(object):
         
         cdef np.uint64_t pass_index
         for pass_index in range(self.pass_number):
-            reader.restart(self.holdout)
+            if self.use_cache:
+                if pass_index == 0:
+                    reader.restart(0, write_cache=True)
+                else:
+                    reader.restart(0, use_cache=True)
+            else:
+                reader.restart(self.holdout)
             if self.items_processed < self.max_iteration:
                 self.run_train_pass(reader)
         
@@ -161,7 +170,10 @@ cdef class Classifier(object):
         if self.holdout != 0:
             if self.display:
                 print '{:-^50}'.format(' HOLDOUT PASS ')
-            reader.restart(-self.holdout)
+            if self.use_cache:
+                reader.restart(-self.holdout, use_cache=True)
+            else:
+                reader.restart(-self.holdout)
             self.run_holdout_pass(reader)
             self.holdout_loss /= self.holdout_items_processed
     

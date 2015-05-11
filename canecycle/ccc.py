@@ -61,10 +61,11 @@ def main():
             parser.error("Hash size must be specified if reading from"
                          " text file")
         hash_size = 2**args.hash_size
-        source = from_shad_lsml(args.learn, hash_size, args.discard_numeric)
         if args.cache:
-            cache_file_name = args.cache
-    else:
+            source = from_shad_lsml(args.learn, hash_size, args.discard_numeric, args.cache)
+        else:
+            source = from_shad_lsml(args.learn, hash_size, args.discard_numeric, '')
+    elif args.cache:
         if args.discard_numeric:
             parser.error("Can't skip numerics in cache files")
         source = CacheReader(args.cache)
@@ -72,12 +73,15 @@ def main():
             parser.error("Specified hash size differs from one in the"
                          " cache file")
         hash_size = source.get_hash_size()
+    else:
+        parser.error("Must specify either --learn of --cache")
 
     optimizer = Optimizer(args.l1, args.l2, hash_size, args.alpha,
                           args.beta, loss_function)
+
     classifier = Classifier(optimizer, loss_function, WeightManager(),
                             args.progressive, args.holdout, args.passes,
-                            display=args.verbose, cache_file_name=cache_file_name)
+                            display=args.verbose, use_cache=bool(args.cache and args.learn))
 
     
     classifier.fit(source)
