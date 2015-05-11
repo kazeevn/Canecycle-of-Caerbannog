@@ -32,7 +32,8 @@ cdef class Optimizer(object):
         cdef np.int_t n_steps = int(np.ceil(item.weight-1e-3))
         cdef np.ndarray[np.float_t, ndim=1] gradient
         cdef np.ndarray[np.float_t, ndim=1] sigma
-        for i in range(n_steps):
+        cdef np.uint32_t step_index
+        for step_index in range(n_steps):
             weights[l1_survived_indexes] = self.betta + np.sqrt(self.n[l1_survived_indexes])
             weights[l1_survived_indexes] /= self.alpha
             weights[l1_survived_indexes] += self.l2Regularization
