@@ -1,11 +1,13 @@
 # cython: profile=True
-from itertools import izip, imap
+
+
+from itertools import izip, imap, islice, count
+import numpy as np
+cimport numpy as np
+
 from canecycle.item cimport Item
 from canecycle.hash_function cimport HashFunction
-from itertools import islice, count
-import string
-from numpy cimport ndarray, uint64_t
-from numpy import uint64, float_
+
 
 def name_iterator():
     cdef unsigned int i
@@ -14,22 +16,23 @@ def name_iterator():
         yield "%d_" % i
         i += 1
 
-#TODO(kazeevn) switch to proper Cython
-ValueType_label = 0
-ValueType_categorical = 1
-ValueType_numerical = 2
-ValueType_skip = 3
+
+cdef np.int_t VALUETYPE_LABEL = 0
+cdef np.int_t VALUETYPE_CATEGORICAL = 1
+cdef np.int_t VALUETYPE_NUMERICAL = 2
+cdef np.int_t VALUETYPE_SKIP = 3
+
 
 def transform_header(header_item):
     if header_item == 'CLICK':
-        return ValueType_label
+        return VALUETYPE_LABEL
     elif header_item == 'ID':
-        return ValueType_skip
+        return VALUETYPE_SKIP
     # It should be CAT, but the header contains typos
     elif header_item.startswith('CA') or header_item.startswith('AT'):
-        return ValueType_categorical
+        return VALUETYPE_CATEGORICAL
     elif header_item.startswith('NUM'):
-        return ValueType_numerical
+        return VALUETYPE_NUMERICAL
     else:
         raise ValueError("Unknown item in header %s" % header_item)
 
@@ -42,7 +45,7 @@ def read_shad_lsml_header(filename):
     return result
 
 
-cdef class Parser:
+cdef class Parser(object):
     def __cinit__(self, HashFunction hash_function, list format_):
         cdef str colomn_name
         self.hash_function = hash_function
@@ -50,11 +53,11 @@ cdef class Parser:
         column_namer = name_iterator()
         self.column_names = list(islice(column_namer, len(self.format)))
         self.feature_columns_count = len(filter(
-            lambda item_format: item_format in (ValueType_categorical, ValueType_numerical),
+            lambda item_format: item_format in (VALUETYPE_CATEGORICAL, VALUETYPE_NUMERICAL),
             self.format))
         self.numeric_hashes = list()
         for column_name, item_format in izip(self.column_names, self.format):
-            if item_format == ValueType_numerical:
+            if item_format == VALUETYPE_NUMERICAL:
                 self.numeric_hashes.append(self.hash_function.hash(column_name))
             else:
                 # None would have been more appropriate, but Cython doesn't support
@@ -68,36 +71,33 @@ cdef class Parser:
         cdef str column_name
         cdef list indexes
         cdef list data
-        cdef uint64_t item_format
-        cdef uint64_t hash
-        cdef uint64_t index
+        cdef np.uint64_t item_format
+        cdef np.uint64_t hash
+        cdef np.uint64_t index
         processed_line = line.rstrip().split(',')
         item = Item()
-        item.indexes = ndarray(self.feature_columns_count, dtype=uint64)
-        item.data = ndarray(self.feature_columns_count, dtype=float_)
-        index = 0
+        item.indexes = np.ndarray(self.feature_columns_count, dtype=np.uint64)
+        item.data = np.ndarray(self.feature_columns_count, dtype=np.float_)
         for item_format, readout, column_name, hash in \
             izip(self.format, processed_line, self.column_names, self.numeric_hashes):
             if readout == '':
                 continue
-            if item_format == ValueType_label:
+            if item_format == VALUETYPE_LABEL:
                 item.label = int(readout) * 2 - 1
-            elif item_format == ValueType_categorical:
+            elif item_format == VALUETYPE_CATEGORICAL:
                 item.indexes[index] = self.hash_function.hash(column_name + readout)
                 item.data[index] = 1.
                 index += 1
-            elif item_format == ValueType_numerical:
+            elif item_format == VALUETYPE_NUMERICAL:
                 # In __init__ we precalculate hashes for numeric values
                 item.indexes[index] = hash
                 item.data[index] = float(readout)
                 index += 1
-            elif item_format != ValueType_skip:
+            elif item_format != VALUETYPE_SKIP:
                 raise ValueError("Invalid format %s" % item_format)
         item.data.resize(index)
         item.indexes.resize(index)
         return item
     
-    cpdef uint64_t get_features_count(self):
+    cpdef np.uint64_t get_features_count(self):
         return self.hash_function.hash_size
-                
-        

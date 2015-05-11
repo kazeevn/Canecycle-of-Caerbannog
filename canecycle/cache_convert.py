@@ -4,6 +4,7 @@ import argparse
 from canecycle.reader import from_shad_lsml
 from canecycle.cache import CacheWriter
 
+
 def main():
     parser = argparse.ArgumentParser(description="Converter into the fast .can format")
     parser.add_argument("-i", "--input", type=str, required=True,
@@ -21,6 +22,7 @@ def main():
         cache_writer.write_item(item)
     cache_writer.close()
     reader.close()
+
 
 if __name__ == '__main__':
     main()

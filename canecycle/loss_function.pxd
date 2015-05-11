@@ -1,13 +1,11 @@
-from item cimport Item
-cimport numpy
+cimport numpy as np
+
+from canecycle.item cimport Item
+
 
 cdef class LossFunction(object):
-    cpdef numpy.float_t get_loss(self, Item item, numpy.ndarray[numpy.float_t, ndim=1] weights)
-    cpdef numpy.int_t get_decision(self, Item item, numpy.ndarray[numpy.float_t, ndim=1] weights)
-    cpdef numpy.float_t get_proba(self, Item item, numpy.ndarray[numpy.float_t, ndim=1] weights)
-    cpdef numpy.ndarray[numpy.float_t, ndim=1] get_gradient(self, Item item, numpy.ndarray[numpy.float_t, ndim=1])
-    cpdef numpy.float_t get_log_proba(self, Item item,
-        numpy.ndarray[numpy.float_t, ndim=1] weights)
-    cpdef numpy.float_t get_log_one_minus_proba(
-        self, Item item,
-        numpy.ndarray[numpy.float_t, ndim=1] weights)
+    cpdef np.float_t get_log_proba(self, Item item, np.ndarray[np.float_t, ndim=1] weights)
+    cpdef np.float_t get_log_one_minus_proba(self, Item item,np.ndarray[np.float_t, ndim=1] weights)
+    cpdef np.float_t get_loss(self, Item item, np.ndarray[np.float_t, ndim=1] weights)
+    cpdef np.int_t get_decision(self, Item item, np.ndarray[np.float_t, ndim=1] weights)
+    cpdef np.ndarray[np.float_t, ndim=1] get_gradient(self, Item item, np.ndarray[np.float_t, ndim=1])

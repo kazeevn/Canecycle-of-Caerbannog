@@ -1,5 +1,9 @@
 #!/usr/bin/env python2
+
+
 import argparse
+import numpy as np
+
 from canecycle.hash_function import HashFunction
 from canecycle.reader import from_shad_lsml
 from canecycle.classifier import Classifier
@@ -7,13 +11,14 @@ from canecycle.weight_manager import WeightManager
 from canecycle.optimizer import Optimizer
 from canecycle.loss_function import LossFunction
 from canecycle.cache import CacheReader
-import numpy
+
 
 def check_negative(value):
     int_value = int(value)
     if int_value < 0:
          raise argparse.ArgumentTypeError("%s isn't a valid non-negative integer" % value)
     return int_value
+
 
 def main():
     parser = argparse.ArgumentParser(description="An FTRL-based online learning machine")
@@ -48,7 +53,7 @@ def main():
     args = parser.parse_args()
     if args.debug:
         args.verbose = True
-        numpy.seterr(invalid='raise', over='raise')
+        np.seterr(invalid='raise', over='raise')
     
     if args.predict and not args.output:
         parser.error("--predict requires --output")
@@ -82,13 +87,11 @@ def main():
     classifier = Classifier(optimizer, loss_function, WeightManager(),
                             args.progressive, args.holdout, args.passes,
                             display=args.verbose, use_cache=bool(args.cache and args.learn))
-
     
     classifier.fit(source)
     source.close()
     if args.holdout != 0:
         print("Average holdout loss: %f" % classifier.get_holdout_loss())
-    # TODO(kazeevn) add progressive_validation
     
     if args.predict:
         predict_file = from_shad_lsml(
