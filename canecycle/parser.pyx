@@ -1,6 +1,3 @@
-# cython: profile=True
-
-
 from itertools import izip, imap, islice, count
 import numpy as np
 cimport numpy as np
