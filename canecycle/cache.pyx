@@ -9,14 +9,6 @@ from canecycle.source import dropping_iterator
 
 
 cdef class CacheWriter(object):
-    cdef numpy.uint64_t objects_written
-    cdef object item_array
-    cdef object table
-    cdef object file
-    cdef numpy.uint64_t max_feature_columns_count
-    cdef list struct_mapping
-    cdef unsigned int hash_size
-
     def __cinit__(self, max_feature_columns_count, hash_size):
         self.max_feature_columns_count = max_feature_columns_count
         # We serialize into

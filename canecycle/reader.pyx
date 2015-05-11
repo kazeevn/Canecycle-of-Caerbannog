@@ -45,6 +45,7 @@ cdef class Reader(Source):
         self.skip = skip
         self.filename = filename
         self.cache_file_name = cache_file_name
+        self.open_cache_writer = False
         
     def restart(self, np.int_t holdout, bool write_cache=False, bool use_cache=False):
         """Restarts the source. Specify positive holdout to omit each h-th
@@ -58,9 +59,15 @@ cdef class Reader(Source):
             self.file.close()
         else:
             self.is_ready = True
+        
+        if self.open_cache_writer:
+            self.open_cache_writer = False
+            self.cache_writer.close()
+            
         self.file = open(self.filename)
         for _ in xrange(self.skip):
             next(self.file)
+
         self.holdout = holdout
         if write_cache and use_cache:
             raise ValueError("Can't write and use cache at the same time")
@@ -70,11 +77,12 @@ cdef class Reader(Source):
             cache_reader.restart(holdout)
             self.iterator = cache_reader.__iter__()
         elif write_cache:
-            cache_writer = CacheWriter(self.get_feature_columns_count(), self.get_features_count())
-            cache_writer.open(self.cache_file_name)
+            self.open_cache_writer = True
+            self.cache_writer = CacheWriter(self.get_feature_columns_count(), self.get_features_count())
+            self.cache_writer.open(self.cache_file_name)
             def parse_and_cache(str line):
                 cdef Item item = self.parser.parse(line)
-                cache_writer.write(item)
+                self.cache_writer.write_item(item)
                 return item
             self.iterator = dropping_iterator(imap(parse_and_cache, self.file), self.holdout)
         else:
@@ -88,6 +96,8 @@ cdef class Reader(Source):
 
     
     cpdef close(self):
+        if self.open_cache_writer:
+            self.cache_writer.close()
         self.file.close()
 
 

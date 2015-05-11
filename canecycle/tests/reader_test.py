@@ -1,13 +1,14 @@
 import unittest
 import os.path
-from itertools import imap
+from itertools import imap, izip
+import numpy
 
 from canecycle.hash_function import HashFunction
 from canecycle.parser import Parser, read_shad_lsml_header
 from canecycle.reader import Reader, from_shad_lsml
 from canecycle.source import NotInitialized
+from canecycle.cache import CacheReader
 
-from tables import HDF5ExtError
 
 class TestReader(unittest.TestCase):
     test_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -22,7 +23,15 @@ class TestReader(unittest.TestCase):
         with self.assertRaises(NotInitialized):
             next(reader.__iter__())
     
+    def compare_items(self, item_one, item_two):
+        self.assertEqual(item_one.label, item_two.label)
+        self.assertEqual(item_one.weight, item_two.weight)
+        numpy.testing.assert_array_equal(
+            item_one.data, item_two.data)
+        numpy.testing.assert_array_equal(
+            item_one.indexes, item_two.indexes)
 
+            
     def test_holdout_count(self):
         format_ = read_shad_lsml_header(self.test_file)
         hash_function = HashFunction(2**20)
@@ -59,4 +68,22 @@ class TestReader(unittest.TestCase):
 
     def test_cache_writing(self):
         reader = from_shad_lsml(self.test_file, 2**25, True, self.test_cache_file)
+        raw_reader = from_shad_lsml(self.test_file, 2**25, True)
+        raw_reader.restart(3)
         reader.restart(3, write_cache=True)
+        for read_item, cached_item in izip(raw_reader, reader):
+            self.compare_items(read_item, cached_item)
+        reader.close()
+
+        cache_reader = CacheReader(self.test_cache_file)
+        cache_reader.restart(0)
+        raw_reader.restart(0)
+        for read_item, cached_item in izip(raw_reader, cache_reader):
+            self.compare_items(read_item, cached_item)
+            
+        reader.restart(-4, use_cache=True)
+        raw_reader.restart(-4)
+        for read_item, cached_item in izip(raw_reader, reader):
+            self.compare_items(read_item, cached_item)
+        
+        
