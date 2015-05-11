@@ -6,7 +6,7 @@
 import numpy as np
 cimport numpy as np
 from item import Item
-
+from item cimport Item
 
 from canecycle.loss_function cimport LossFunction
 
@@ -30,13 +30,11 @@ cdef class Optimizer(object):
         self.betta = betta
         self.loss_function = loss_function
 
-    cpdef np.ndarray[np.float_t, ndim=1] step(self, item, 
+    cpdef np.ndarray[np.float_t, ndim=1] step(self, Item item, 
                                               np.ndarray[np.float_t, ndim=1] weights):
-        cdef np.ndarray[np.uint64_t, ndim=1] non_zero_indices = item.indexes
-        cdef np.ndarray[np.float_t, ndim=1] non_zero_values = item.data
-        cdef np.uint64_t index, index_in_vector
-        for index, index_in_vector in enumerate(non_zero_indices):
-            if abs(self.z[index_in_vector]) <= self.l1Regularization:
+        cdef np.uint64_t index_in_vector
+        for index_in_vector in item.indexes:
+            if np.abs(self.z[index_in_vector]) <= self.l1Regularization:
                 weights[index_in_vector] = 0.0
             else:
                 weights[index_in_vector] = self.betta + np.sqrt(self.n[index_in_vector])
@@ -46,12 +44,12 @@ cdef class Optimizer(object):
                 weights[index_in_vector] *= (self.z[index_in_vector] - 
                                  np.sign(self.z[index_in_vector]) * self.l1Regularization)
         cdef np.ndarray[np.float_t, ndim=1] gradient = self.loss_function.get_gradient(item, weights)
-        cdef np.ndarray[np.float_t, ndim=1] sigma = np.sqrt(self.n[non_zero_indices] + gradient ** 2)
-        sigma -= np.sqrt(self.n[non_zero_indices])
+        cdef np.ndarray[np.float_t, ndim=1] sigma = np.sqrt(self.n[item.indexes] + gradient ** 2)
+        sigma -= np.sqrt(self.n[item.indexes])
         sigma /= self.alpha
-        self.z[non_zero_indices] += gradient
-        self.z[non_zero_indices] -= sigma * weights[non_zero_indices]
-        self.n[non_zero_indices] += gradient ** 2
+        self.z[item.indexes] += gradient
+        self.z[item.indexes] -= sigma * weights[item.indexes]
+        self.n[item.indexes] += gradient ** 2
         return weights
 
 
