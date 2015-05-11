@@ -26,14 +26,16 @@ cdef class Optimizer(object):
 
     cpdef np.ndarray[np.float_t, ndim=1] step(self, Item item, 
                                               np.ndarray[np.float_t, ndim=1] weights):
-        cdef np.ndarray l1_survived = np.abs(self.z[item.indexes]) > self.l1Regularization
-        weights[item.indexes[-l1_survived]] = 0.0
-        cdef np.ndarray[np.uint64_t, ndim=1] l1_survived_indexes = item.indexes[l1_survived]
-        cdef np.int_t n_steps = int(np.ceil(item.weight-1e-3))
+        cdef np.ndarray[np.float_t, ndim=1] l1_survived
+        cdef np.ndarray[np.uint64_t, ndim=1] l1_survived_indexes
         cdef np.ndarray[np.float_t, ndim=1] gradient
         cdef np.ndarray[np.float_t, ndim=1] sigma
+        cdef np.uint32_t n_steps = int(np.ceil(item.weight-1e-3))
         cdef np.uint32_t step_index
         for step_index in range(n_steps):
+            l1_survived = np.abs(self.z[item.indexes]) > self.l1Regularization
+            weights[item.indexes[-l1_survived]] = 0.0
+            l1_survived_indexes = item.indexes[l1_survived]
             weights[l1_survived_indexes] = self.betta + np.sqrt(self.n[l1_survived_indexes])
             weights[l1_survived_indexes] /= self.alpha
             weights[l1_survived_indexes] += self.l2Regularization
