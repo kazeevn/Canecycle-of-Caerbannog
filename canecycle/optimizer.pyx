@@ -32,21 +32,23 @@ cdef class Optimizer(object):
 
     cpdef np.ndarray[np.float_t, ndim=1] step(self, Item item, 
                                               np.ndarray[np.float_t, ndim=1] weights):
-        weights[item.indexes] = self.betta + np.sqrt(self.n[item.indexes])
-        weights[item.indexes] /= self.alpha
-        weights[item.indexes] += self.l2Regularization
-        weights[item.indexes] = -1. / weights[item.indexes]
-        weights[item.indexes] *= (self.z[item.indexes] - 
-                         np.sign(self.z[item.indexes]) * self.l1Regularization)
-
-        weights[item.indexes][np.abs(self.z[item.indexes]) <= self.l1Regularization] = 0.0
+        cdef np.ndarray l1_survived = np.abs(self.z[item.indexes]) > self.l1Regularization
+        weights[item.indexes[-l1_survived]] = 0.0
+        cdef np.ndarray[np.uint64_t, ndim=1] l1_survived_indexes = item.indexes[l1_survived]
+        
+        weights[l1_survived_indexes] = self.betta + np.sqrt(self.n[l1_survived_indexes])
+        weights[l1_survived_indexes] /= self.alpha
+        weights[l1_survived_indexes] += self.l2Regularization
+        weights[l1_survived_indexes] = -1. / weights[l1_survived_indexes]
+        weights[l1_survived_indexes] *= (self.z[l1_survived_indexes] - 
+                         np.sign(self.z[l1_survived_indexes]) * self.l1Regularization)
 
         cdef np.ndarray[np.float_t, ndim=1] gradient = self.loss_function.get_gradient(item, weights)
-        cdef np.ndarray[np.float_t, ndim=1] sigma = np.sqrt(self.n[item.indexes] + gradient ** 2)
-        sigma -= np.sqrt(self.n[item.indexes])
+        cdef np.ndarray[np.float_t, ndim=1] sigma = np.sqrt(self.n[l1_survived_indexes] + gradient[l1_survived] ** 2)
+        sigma -= np.sqrt(self.n[l1_survived_indexes])
         sigma /= self.alpha
         self.z[item.indexes] += gradient
-        self.z[item.indexes] -= sigma * weights[item.indexes]
+        self.z[l1_survived_indexes] -= sigma * weights[l1_survived_indexes]
         self.n[item.indexes] += gradient ** 2
         return weights
 
