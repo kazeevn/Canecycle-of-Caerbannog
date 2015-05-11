@@ -22,7 +22,7 @@ class TestParser(unittest.TestCase):
 
     def test_parse(self):
         format_ = read_shad_lsml_header(self.test_file)
-        hash_function = HashFunction(20)
+        hash_function = HashFunction(2**20)
         parser = Parser(hash_function, format_)
         input_file = open(self.test_file)
         # Skipt header
@@ -41,7 +41,7 @@ class TestParser(unittest.TestCase):
             item = parser.parse(line)
 
     def test_features_count(self):
-        hash_function = HashFunction(20)
+        hash_function = HashFunction(2**20)
         parser = Parser(hash_function, [])
         self.assertEqual(parser.get_features_count(), 2**20)
         

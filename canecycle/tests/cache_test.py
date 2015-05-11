@@ -13,7 +13,7 @@ class TestReader(TestCase):
    
     def test_cache_write_and_read(self):
         cache_file = './testing.cache'
-        hash_size = 20
+        hash_size = 2**20
         reader = from_shad_lsml(self.test_file, hash_size)
         reader.restart(0)
         cache_writer = CacheWriter(60, hash_size)

@@ -17,11 +17,10 @@ def check_negative(value):
 
 def main():
     parser = argparse.ArgumentParser(description="An FTRL-based online learning machine")
-    input_ = parser.add_mutually_exclusive_group(required=True)
-    input_.add_argument("-l", "--learn", type=str,
+    parser.add_argument("-l", "--learn", type=str,
                         help="Input file for training in SHAD-LSML format")
-    input_.add_argument("-c", "--cache", type=str,
-                        help="Read input from the cache file")
+    parser.add_argument("-c", "--cache", type=str,
+                        help="Use the cache file")
     parser.add_argument("-H", "--holdout", type=check_negative, default=0,
                         help="Each h-th line is not used for learning. After learning, "
                         "the average loss over h-th lines is calculated")
@@ -56,26 +55,29 @@ def main():
     if args.passes <= 0:
         parser.error("--passes must be positive")
     loss_function = LossFunction()
+    cache_file_name = None
     if args.learn:
         if not args.hash_size:
             parser.error("Hash size must be specified if reading from"
                          " text file")
-        hash_size = args.hash_size
+        hash_size = 2**args.hash_size
         source = from_shad_lsml(args.learn, hash_size, args.discard_numeric)
+        if args.cache:
+            cache_file_name = args.cache
     else:
         if args.discard_numeric:
             parser.error("Can't skip numerics in cache files")
         source = CacheReader(args.cache)
-        if args.hash_size and args.hash_size != source.get_hash_size():
+        if args.hash_size and 2**args.hash_size != source.get_hash_size():
             parser.error("Specified hash size differs from one in the"
                          " cache file")
         hash_size = source.get_hash_size()
 
-    optimizer = Optimizer(args.l1, args.l2, 2**hash_size, args.alpha,
+    optimizer = Optimizer(args.l1, args.l2, hash_size, args.alpha,
                           args.beta, loss_function)
     classifier = Classifier(optimizer, loss_function, WeightManager(),
                             args.progressive, args.holdout, args.passes,
-                            display=args.verbose)
+                            display=args.verbose, cache_file_name=cache_file_name)
 
     
     classifier.fit(source)
@@ -86,7 +88,7 @@ def main():
     
     if args.predict:
         predict_file = from_shad_lsml(
-            args.predict, args.hash_size, args.discard_numeric)
+            args.predict, hash_size, args.discard_numeric)
         output_file = open(args.output, 'w')
         for prediction in classifier.predict_proba(predict_file):
             output_file.write("%g\n" % prediction)

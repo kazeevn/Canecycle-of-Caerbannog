@@ -38,7 +38,7 @@ cdef class CacheWriter(object):
         cdef object metadata_table
         cdef object filters
 
-        filters = tables.Filters(complib='blosc5')
+        filters = tables.Filters(complib='blosc', complevel=6)
         self.file = tables.open_file(filename, mode='w', chunkshape=(10000, 1), filters=filters)
         self.objects_written = 0
         mapped_item = numpy.ndarray(0, dtype=self.struct_mapping)
@@ -113,4 +113,4 @@ cdef class CacheReader(Source):
         return metadata_table[0]['hash_size']
 
     cpdef numpy.uint64_t get_features_count(self):
-        return 2**self.get_hash_size()
+        return self.get_hash_size()

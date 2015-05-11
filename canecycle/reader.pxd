@@ -9,6 +9,7 @@ cdef class Reader(Source):
     cdef Parser parser
     cdef str filename
     cdef uint64_t skip
+    cdef str cache_file_name
     
     cpdef uint64_t get_features_count(self)
     cpdef uint64_t get_feature_columns_count(self)

@@ -45,7 +45,7 @@ cdef class Classifier(object):
     def __cinit__(self, optimizer, LossFunction loss_function, WeightManager weight_manager,
             c_bool store_progressive_validation, np.int_t holdout, np.uint64_t pass_number,
             c_bool display=False, np.uint32_t save_period=0, str save_path_prefix='',
-            np.uint64_t max_iteration=1000000000):
+                  np.uint64_t max_iteration=1000000000):
         
         if pass_number < 0:
             raise ValueError("Negative number of passes.")
@@ -91,8 +91,8 @@ cdef class Classifier(object):
             # cPickle.dump(self.optimizer, f, protocol=2)
         # with open(self.save_path_prefix+'reader_'+str(self.items_processed), 'w+') as f:
             # cPickle.dump(self.reader, f, protocol=2)
-    
-    cdef void run_train_pass(self, Source reader) except *:
+
+    cdef void run_train_pass(self, Source reader):
         cdef Item item
         for item in reader:
             # validation routine
