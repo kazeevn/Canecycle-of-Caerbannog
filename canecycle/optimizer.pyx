@@ -32,17 +32,15 @@ cdef class Optimizer(object):
 
     cpdef np.ndarray[np.float_t, ndim=1] step(self, Item item, 
                                               np.ndarray[np.float_t, ndim=1] weights):
-        cdef np.uint64_t index_in_vector
-        for index_in_vector in item.indexes:
-            if np.abs(self.z[index_in_vector]) <= self.l1Regularization:
-                weights[index_in_vector] = 0.0
-            else:
-                weights[index_in_vector] = self.betta + np.sqrt(self.n[index_in_vector])
-                weights[index_in_vector] /= self.alpha
-                weights[index_in_vector] += self.l2Regularization
-                weights[index_in_vector] = -1. / weights[index_in_vector]
-                weights[index_in_vector] *= (self.z[index_in_vector] - 
-                                 np.sign(self.z[index_in_vector]) * self.l1Regularization)
+        weights[item.indexes] = self.betta + np.sqrt(self.n[item.indexes])
+        weights[item.indexes] /= self.alpha
+        weights[item.indexes] += self.l2Regularization
+        weights[item.indexes] = -1. / weights[item.indexes]
+        weights[item.indexes] *= (self.z[item.indexes] - 
+                         np.sign(self.z[item.indexes]) * self.l1Regularization)
+
+        weights[item.indexes][np.abs(self.z[item.indexes]) <= self.l1Regularization] = 0.0
+
         cdef np.ndarray[np.float_t, ndim=1] gradient = self.loss_function.get_gradient(item, weights)
         cdef np.ndarray[np.float_t, ndim=1] sigma = np.sqrt(self.n[item.indexes] + gradient ** 2)
         sigma -= np.sqrt(self.n[item.indexes])
