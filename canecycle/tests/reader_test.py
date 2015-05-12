@@ -1,7 +1,7 @@
 import unittest
 import os.path
 from itertools import imap, izip
-import numpy
+import numpy as np
 
 from canecycle.hash_function import HashFunction
 from canecycle.parser import Parser, read_shad_lsml_header
@@ -26,9 +26,9 @@ class TestReader(unittest.TestCase):
     def compare_items(self, item_one, item_two):
         self.assertEqual(item_one.label, item_two.label)
         self.assertEqual(item_one.weight, item_two.weight)
-        numpy.testing.assert_array_equal(
+        np.testing.assert_array_equal(
             item_one.data, item_two.data)
-        numpy.testing.assert_array_equal(
+        np.testing.assert_array_equal(
             item_one.indexes, item_two.indexes)
 
             
@@ -85,5 +85,3 @@ class TestReader(unittest.TestCase):
         raw_reader.restart(-4)
         for read_item, cached_item in izip(raw_reader, reader):
             self.compare_items(read_item, cached_item)
-        
-        

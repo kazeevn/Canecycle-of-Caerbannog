@@ -5,8 +5,8 @@ import os.path
 
 from canecycle.weight_manager import WeightManager 
 
+
 class TestWeightManager(unittest.TestCase):
-    
     def test_weight_increment_one(self):
         weight_manager = WeightManager() # p=0.5, n=1
         self.assertAlmostEqual(weight_manager.get_weight(-1, 1), 1/3, places=5)
