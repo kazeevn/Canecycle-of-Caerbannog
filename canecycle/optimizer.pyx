@@ -27,28 +27,28 @@ cdef class Optimizer(object):
     cpdef np.ndarray[np.float_t, ndim=1] step(self, Item item, 
                                               np.ndarray[np.float_t, ndim=1] weights):
         cdef np.ndarray l1_survived
-        cdef np.ndarray[np.uint64_t, ndim=1] l1_survived_indexes
+        cdef np.ndarray[np.uint64_t, ndim=1] l1_survived_indices
         cdef np.ndarray[np.float_t, ndim=1] gradient
         cdef np.ndarray[np.float_t, ndim=1] sigma
         cdef np.uint32_t n_steps = int(np.ceil(item.weight))
         cdef np.uint32_t step_index
         for step_index in xrange(n_steps):
-            l1_survived = np.abs(self.z[item.indexes]) > self.l1Regularization
-            weights[item.indexes[-l1_survived]] = 0.0
-            l1_survived_indexes = item.indexes[l1_survived]
-            weights[l1_survived_indexes] = self.beta + np.sqrt(self.n[l1_survived_indexes])
-            weights[l1_survived_indexes] /= self.alpha
-            weights[l1_survived_indexes] += self.l2Regularization
-            weights[l1_survived_indexes] = -1. / weights[l1_survived_indexes]
-            weights[l1_survived_indexes] *= (self.z[l1_survived_indexes] - 
-                            np.sign(self.z[l1_survived_indexes]) * self.l1Regularization)
+            l1_survived = np.abs(self.z[item.indices]) > self.l1Regularization
+            weights[item.indices[-l1_survived]] = 0.0
+            l1_survived_indices = item.indices[l1_survived]
+            weights[l1_survived_indices] = self.beta + np.sqrt(self.n[l1_survived_indices])
+            weights[l1_survived_indices] /= self.alpha
+            weights[l1_survived_indices] += self.l2Regularization
+            weights[l1_survived_indices] = -1. / weights[l1_survived_indices]
+            weights[l1_survived_indices] *= (self.z[l1_survived_indices] - 
+                            np.sign(self.z[l1_survived_indices]) * self.l1Regularization)
     
             gradient = self.loss_function.get_gradient(item, weights)
-            sigma = np.sqrt(self.n[l1_survived_indexes] + gradient[l1_survived] ** 2)
-            sigma -= np.sqrt(self.n[l1_survived_indexes])
+            sigma = np.sqrt(self.n[l1_survived_indices] + gradient[l1_survived] ** 2)
+            sigma -= np.sqrt(self.n[l1_survived_indices])
             sigma /= self.alpha
-            self.z[item.indexes] += gradient
-            self.z[l1_survived_indexes] -= sigma * weights[l1_survived_indexes]
-            self.n[item.indexes] += gradient ** 2
+            self.z[item.indices] += gradient
+            self.z[l1_survived_indices] -= sigma * weights[l1_survived_indices]
+            self.n[item.indices] += gradient ** 2
         
         return weights

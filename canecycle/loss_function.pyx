@@ -15,14 +15,14 @@ cdef class LossFunction(object):
     cpdef np.float_t get_log_proba(self, Item item,
                                    np.ndarray[np.float_t, ndim=1] weights):
         cdef np.float_t dot_product = np.dot(
-            item.data, weights[item.indexes])
+            item.data, weights[item.indices])
         return -np.logaddexp(0., -dot_product)
             
 
     cpdef np.float_t get_log_one_minus_proba(self, Item item,
                                              np.ndarray[np.float_t, ndim=1] weights):
         cdef np.float_t dot_product = np.dot(
-            item.data, weights[item.indexes])
+            item.data, weights[item.indices])
         return -np.logaddexp(0., dot_product)
 
     cpdef np.int_t get_decision(self, Item item,
@@ -32,7 +32,7 @@ cdef class LossFunction(object):
     cpdef np.float_t get_loss(self, Item item,
                               np.ndarray[np.float_t, ndim=1] weights):
         cdef np.float_t dot_product = np.dot(
-            item.data, weights[item.indexes])
+            item.data, weights[item.indices])
 
         if item.label == 1:
             return np.logaddexp(0., -dot_product)

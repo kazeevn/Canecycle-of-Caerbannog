@@ -24,7 +24,7 @@ cdef class CacheWriter(object):
             ('label', 'int_'),
             ('weight', 'float_'),
             ('features_count', 'uint64'),
-            ('indexes', 'uint64', max_feature_columns_count),
+            ('indices', 'uint64', max_feature_columns_count),
             ('data', 'float', max_feature_columns_count)
         ]
         self.hash_size = hash_size
@@ -61,9 +61,9 @@ cdef class CacheWriter(object):
         mapped_item = np.ndarray(1, dtype=self.struct_mapping)
         mapped_item['label'] = item.label
         mapped_item['weight'] = item.weight
-        features_count =  len(item.indexes)
+        features_count =  len(item.indices)
         mapped_item['features_count'] = features_count
-        mapped_item['indexes'][0, :features_count] = item.indexes
+        mapped_item['indices'][0, :features_count] = item.indices
         mapped_item['data'][0, :features_count] = item.data
         self.table.append(mapped_item)
         
@@ -123,9 +123,9 @@ cdef class CacheReader(Source):
         item.weight = row['weight']
         features_count = row['features_count']
         item.data = row['data']
-        item.indexes = row['indexes']
+        item.indices = row['indices']
         item.data.resize(features_count)
-        item.indexes.resize(features_count)
+        item.indices.resize(features_count)
         return item
     
     cpdef close(self):

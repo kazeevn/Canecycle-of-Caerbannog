@@ -10,7 +10,7 @@ class OptimizerTestCase(unittest.TestCase):
     def test_zero_vector(self):
         loss_function = LossFunction()
         item = Item()
-        item.indexes = np.array([], dtype=np.uint64)
+        item.indices = np.array([], dtype=np.uint64)
         item.data = np.array([])
         optimizer = Optimizer(0, 0, 3, 0.1, 0.1, loss_function)
         test_value = np.random.rand(3)
@@ -20,7 +20,7 @@ class OptimizerTestCase(unittest.TestCase):
     def test_minimization(self):
         loss_function = LossFunction()
         item = Item()
-        item.indexes = np.array([0, 1], dtype=np.uint64)
+        item.indices = np.array([0, 1], dtype=np.uint64)
         item.data = np.array([1.0, 1.0], dtype=np.float_)
         weights = np.array([0., 0.])
         item.label = 1
