@@ -1,7 +1,9 @@
 import unittest
+import numpy as np
+
 from canecycle.item import Item
 from canecycle.loss_function import LossFunction
-import numpy as np
+
 
 class LossFunctionTest(unittest.TestCase):
     def test_predict_proba(self):
@@ -14,8 +16,6 @@ class LossFunctionTest(unittest.TestCase):
             loss.get_log_proba(item, weights), np.log(1./(1. + np.exp(-2))))
         self.assertAlmostEqual(
             loss.get_log_one_minus_proba(item, weights), np.log(1 - 1./(1. + np.exp(-2))))
-
-
 
     def test_predict_loss(self):
         item = Item()
@@ -54,7 +54,6 @@ class LossFunctionTest(unittest.TestCase):
         self.assertEqual(
             loss.get_loss(item, weights), 0) 
 
+
 if __name__ == '__main__':
     unittest.main()
-
-    

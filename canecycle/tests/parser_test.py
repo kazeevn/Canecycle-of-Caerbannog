@@ -7,6 +7,7 @@ from canecycle.hash_function import HashFunction
 from canecycle.parser import Parser, read_shad_lsml_header
 import canecycle.parser
 
+
 class TestParser(unittest.TestCase):
     test_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              "train_except.txt")
@@ -25,7 +26,7 @@ class TestParser(unittest.TestCase):
         hash_function = HashFunction(2**20)
         parser = Parser(hash_function, format_)
         input_file = open(self.test_file)
-        # Skipt header
+        # Skip header
         input_file.next()
         line = input_file.next()
         print line
@@ -44,4 +45,3 @@ class TestParser(unittest.TestCase):
         hash_function = HashFunction(2**20)
         parser = Parser(hash_function, [])
         self.assertEqual(parser.get_features_count(), 2**20)
-        

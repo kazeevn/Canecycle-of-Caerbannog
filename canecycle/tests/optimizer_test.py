@@ -1,11 +1,9 @@
 import unittest
 import numpy as np
 
-from scipy.sparse import coo_matrix
 from canecycle.optimizer import Optimizer
 from canecycle.item import Item
 from canecycle.loss_function import LossFunction
-   
 
 
 class OptimizerTestCase(unittest.TestCase):
