@@ -3,9 +3,10 @@ cimport numpy as np
 from canecycle.item cimport Item
 from canecycle.loss_function cimport LossFunction
 
+
 cdef class Optimizer(object):
-    cdef np.float_t l1Regularization
-    cdef np.float_t l2Regularization
+    cdef np.float_t l1_regularization
+    cdef np.float_t l2_regularization
     cdef np.float_t alpha
     cdef np.float_t beta
     cdef np.ndarray z
