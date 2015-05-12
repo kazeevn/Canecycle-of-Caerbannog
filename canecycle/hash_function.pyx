@@ -11,8 +11,6 @@ cdef class HashFunction(object):
             raise ValueError(
                 "We appreciate your hardware, but the maximum "
                 "supported hash size is %d." % MAX_HASH_SIZE)
-        if hash_size < 0:
-            raise ValueError("Hash size should be positive.")
         self.hash_size = hash_size
     
     cpdef np.uint64_t hash(self, str string):
