@@ -91,6 +91,8 @@ from canecycle.loss_function import LossFunction
 from canecycle.optimizer import Optimizer
 from canecycle.hash_function import HashFunction
 from canecycle.reader import from_shad_lsml
+from canecycle.classifier import Classifier
+
 hash_size = 2**20
 source = from_shad_lsml("canecycle/tests/train_except.txt",
 			hash_size=hash_size,
@@ -98,12 +100,12 @@ source = from_shad_lsml("canecycle/tests/train_except.txt",
 			cache_file_name="/tmp/train_except.can")
 optimizer = Optimizer(1e-10, 1e-10, feature_space_size=hash_size,
 	    	      alpha=1e-4, beta=1e-3, loss_function=LossFunction())
-classifier = Classifer(optimizer, LossFunction(), WeightManager(),
+classifier = Classifier(optimizer, LossFunction(), WeightManager(),
 	     	       store_progressive_validation=False,
-		       holdout=10,
+		       holdout=10,	
 		       pass_number=3,
 		       display=True,
 		       use_cache=True)
 classifier.fit(source)
-
+source.close()
 ```
