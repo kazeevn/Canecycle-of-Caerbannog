@@ -9,7 +9,16 @@ from canecycle.source import dropping_iterator
 
 
 cdef class CacheWriter(object):
+    """Class for writing .can binary files."""
+    
     def __cinit__(self, max_feature_columns_count, hash_size):
+        """Arguments:
+        max_feature_columns_count - maximum number of features per item,
+            used for static space allocation
+        hash_size - size of hash function value space. Absolute value,
+            not power of two
+        """
+        
         self.max_feature_columns_count = max_feature_columns_count
         self.struct_mapping = [
             ('label', 'int_'),
@@ -21,6 +30,11 @@ cdef class CacheWriter(object):
         self.hash_size = hash_size
 
     cpdef open(self, filename):
+        """Opens a file for writing.
+        Arguments:
+        filename - file name
+        """
+        
         cdef tuple table_description
         cdef np.ndarray mapped_item
         cdef np.ndarray metadata
@@ -38,6 +52,11 @@ cdef class CacheWriter(object):
         metadata_table.close()
 
     cpdef write_item(self, Item item):
+        """Writes an item to the .can file.
+        Arguments:
+        item - Item to write.
+        """
+        
         cdef np.uint64_t features_count
         mapped_item = np.ndarray(1, dtype=self.struct_mapping)
         mapped_item['label'] = item.label
@@ -49,20 +68,33 @@ cdef class CacheWriter(object):
         self.table.append(mapped_item)
         
     cpdef close(self):
+        """Closes the .can file"""
         self.file.close()
     
 
 cdef class CacheReader(Source):
+    """The class to read from .can file as a Source"""
+    
     cdef object table
     cdef object file
     
     def __cinit__(self, filename):
+        """Arguments:
+        filename - .can file to open
+        """
+        
         cdef object file_
         self.file = tables.open_file(filename)
         self.table = self.file.root.items_table
         self.is_ready = False
 
     cpdef restart(self, np.int_t holdout):
+        """Restarts the source to read from the beginning.
+        Agruments:
+        holdout - if zero, does nothing, if positive, skip every h-th item,
+            if negative, skip every but h-th item
+        """
+        
         self.holdout = holdout
         if holdout > 0:
             self.iterator = imap(
@@ -80,6 +112,11 @@ cdef class CacheReader(Source):
         self.is_ready = True
     
     cpdef Item unpack_item(self, object row):
+        """Converts row read from HDF5 into Item.
+        Arguments:
+        item - Item to convert
+        """
+        
         cdef np.uint64_t features_count
         item = Item()
         item.label = row['label']
@@ -92,10 +129,16 @@ cdef class CacheReader(Source):
         return item
     
     cpdef close(self):
+        """Closes the source"""
+
         self.file.close()
 
     cpdef np.uint64_t get_hash_size(self):
+        """Returnes hash size used while building the cache"""
+
         return self.file.root.metadata_table[0]['hash_size']
 
     cpdef np.uint64_t get_features_count(self):
+        """Returnes hash size used while building the cache"""
+
         return self.get_hash_size()
