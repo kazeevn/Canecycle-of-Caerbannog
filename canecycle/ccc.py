@@ -31,8 +31,6 @@ def main():
                         "the average loss over h-th lines is calculated")
     parser.add_argument("-b", "--hash-size", type=int,
                         help="Hash table size in bits")
-    parser.add_argument("--progressive", action="store_true",
-                        help="Enables output of progressive validation")
     parser.add_argument("--passes", type=int, default=1,
                         help="Number of passes on the learning data")
     parser.add_argument("-p", "--predict", type=str,
@@ -85,13 +83,14 @@ def main():
                           args.beta, loss_function)
 
     classifier = Classifier(optimizer, loss_function, WeightManager(),
-                            args.progressive, args.holdout, args.passes,
+                            False, args.holdout, args.passes,
                             display=args.verbose, use_cache=bool(args.cache and args.learn))
     
     classifier.fit(source)
     source.close()
     if args.holdout != 0:
         print("Average holdout loss: %f" % classifier.get_holdout_loss())
+
     
     if args.predict:
         predict_file = from_shad_lsml(
