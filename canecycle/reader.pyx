@@ -15,6 +15,15 @@ from canecycle.cache import CacheReader, CacheWriter
 # Should be cpdef, but Cython doesn't support closures
 def from_shad_lsml(str filename, np.uint64_t hash_size,
                    bool discard_numeric=False, str cache_file_name=''):
+    """Convenient function to open files in SHAD-LSML format.
+    Arguments:
+    filename - file name to open
+    hash_size - hash size to use, absolute value, not power of 2
+    discard_numeric - discard numeric features
+    cache_file_name - instruct Reader to use cache file with the name
+    Returns Reader instance.
+    """
+    
     cdef list format
     cdef Parser parser
     cdef Reader reader
@@ -31,6 +40,10 @@ def from_shad_lsml(str filename, np.uint64_t hash_size,
 
 
 cdef class Reader(Source):
+    """Class for reading SHAD-LSML files. Supports caching in .can,
+    improves overall speed by ~30%. Don't forget to call restart before
+    using.
+    """
     def __iter__(self):
         if not self.is_ready:
             raise NotInitialized("You should call restart before "
@@ -39,6 +52,13 @@ cdef class Reader(Source):
 
     def __cinit__(self, str filename, Parser parser,
                   np.uint64_t skip, str cache_file_name=''):
+        """Arguments:
+        filename - file name to open
+        parser - Parser instance to use
+        skip - skip line in the beginning of the file
+        cache_file_name - use cache file at location
+        """
+
         self.is_ready = False
         self.parser = parser
         self.skip = skip
@@ -47,13 +67,14 @@ cdef class Reader(Source):
         self.open_cache_writer = False
         
     def restart(self, np.int_t holdout, bool write_cache=False, bool use_cache=False):
-        """Restarts the source. Specify positive holdout to omit each h-th
-        item negative to omit each but h-th item, zero to omit
-        nothing. If called with write_cache, will write cache of the
-        read lines - all, even held out. If called with use_cache,
-        will read from the cache, not file.
-
+        """Restarts the source to read from the beginning.
+        Arguments:
+        holdout - to omit each h-th item negative to omit each but h-th item,
+        zero to omit nothing.
+        write_cache - will write cache of the read lines - all, even held out.
+        use_cache - will read from the cache, not file.
         """
+
         if self.is_ready:
             self.file.close()
         else:
@@ -90,12 +111,18 @@ cdef class Reader(Source):
                                  dropping_iterator(self.file, self.holdout))
 
     cpdef np.uint64_t get_features_count(self):
+        """Returns the hash function value space size"""
+
         return self.parser.get_features_count()
     
     cpdef close(self):
+        """Closes the source"""
+
         if self.open_cache_writer:
             self.cache_writer.close()
         self.file.close()
 
     cpdef np.uint64_t get_feature_columns_count(self):
+        """Returns maximum number of features per item"""
+
         return self.parser.feature_columns_count
