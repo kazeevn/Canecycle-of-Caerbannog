@@ -50,6 +50,7 @@ cdef class Classifier(object):
         self.loss_function = loss_function
         self.weight_manager = weight_manager
         self.store_progressive_validation = store_progressive_validation
+        self.progressive_validation_loss = []
         self.holdout = holdout
         self.pass_number = pass_number
         self.display = display
