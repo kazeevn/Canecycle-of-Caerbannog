@@ -21,6 +21,8 @@ VALUETYPE_SKIP = 3
 
 
 def transform_header(header_item):
+    """Transformes header items from SHAD-LSML strings
+    into internal enum"""
     if header_item == 'CLICK':
         return VALUETYPE_LABEL
     elif header_item == 'ID':
@@ -35,6 +37,12 @@ def transform_header(header_item):
 
 
 def read_shad_lsml_header(filename):
+    """Reads header of SHAD-LSML files.
+    Arguments:
+    filename - file name to read
+    Returnes: list of formats for Parser
+    """
+    
     input_file = open(filename)
     header = input_file.next().split(',')
     result =  map(transform_header, header)
@@ -43,7 +51,14 @@ def read_shad_lsml_header(filename):
 
 
 cdef class Parser(object):
+    """Class for parsing lines from SHAD-LSML into Item"""
+    
     def __cinit__(self, HashFunction hash_function, list format_):
+        """Arguments:
+        hash_function - HashFunction to use
+        format_ - list of ValueTypes to interpret lines
+        """
+        
         cdef str colomn_name
         self.hash_function = hash_function
         self.format = format_
@@ -62,6 +77,12 @@ cdef class Parser(object):
     
 
     cpdef Item parse(self, str line):
+        """Parses a line into an Item.
+        Arguments:
+        line - line to parse
+        Returnes: Item
+        """
+        
         cdef list processed_line
         cdef Item item
         cdef str readout
@@ -98,4 +119,6 @@ cdef class Parser(object):
         return item
     
     cpdef np.uint64_t get_features_count(self):
+        """Returnes hash function values space size"""
+        
         return self.hash_function.hash_size
