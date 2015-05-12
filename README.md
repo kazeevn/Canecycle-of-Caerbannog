@@ -1,17 +1,18 @@
-Required python packages
-=======================
-numpy
-spooky
-tables
-
 Installation
 ============
+Required python packages: 
+numpy, spooky, tables
+
+```bash
 sudo python setup.py install
+```
 
 Tests
 =====
+```bash
 python setup.py build_ext --inplace
 nosetests .
+```
 
 Usage - commad line
 ===================
