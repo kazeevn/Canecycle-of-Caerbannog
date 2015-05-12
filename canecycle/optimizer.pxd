@@ -7,7 +7,7 @@ cdef class Optimizer(object):
     cdef np.float_t l1Regularization
     cdef np.float_t l2Regularization
     cdef np.float_t alpha
-    cdef np.float_t betta
+    cdef np.float_t beta
     cdef np.ndarray z
     cdef np.ndarray n
     cdef LossFunction loss_function

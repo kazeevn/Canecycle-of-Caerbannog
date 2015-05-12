@@ -14,14 +14,14 @@ from canecycle.loss_function cimport LossFunction
 
 cdef class Optimizer(object):
     def __cinit__(self, np.float_t l1Regularization, np.float_t l2Regularization,
-                  np.uint64_t feature_space_size, np.float_t alpha, np.float_t betta,
+                  np.uint64_t feature_space_size, np.float_t alpha, np.float_t beta,
                   LossFunction loss_function):
         self.l1Regularization = l1Regularization
         self.l2Regularization = l2Regularization
         self.z = np.zeros(feature_space_size)
         self.n = np.zeros(feature_space_size)
         self.alpha = alpha
-        self.betta = betta
+        self.beta = beta
         self.loss_function = loss_function
 
     cpdef np.ndarray[np.float_t, ndim=1] step(self, Item item, 
@@ -36,7 +36,7 @@ cdef class Optimizer(object):
             l1_survived = np.abs(self.z[item.indexes]) > self.l1Regularization
             weights[item.indexes[-l1_survived]] = 0.0
             l1_survived_indexes = item.indexes[l1_survived]
-            weights[l1_survived_indexes] = self.betta + np.sqrt(self.n[l1_survived_indexes])
+            weights[l1_survived_indexes] = self.beta + np.sqrt(self.n[l1_survived_indexes])
             weights[l1_survived_indexes] /= self.alpha
             weights[l1_survived_indexes] += self.l2Regularization
             weights[l1_survived_indexes] = -1. / weights[l1_survived_indexes]
