@@ -15,6 +15,7 @@ nosetests .
 
 Usage - commad line
 ===================
+```bash
 usage: ccc.py [-h] [-l LEARN] [-c CACHE] [-H HOLDOUT] [-b HASH_SIZE]
               [--passes PASSES] [-p PREDICT] [-o OUTPUT] [--l1 L1] [--l2 L2]
               [--alpha ALPHA] [--beta BETA] [-v] [-d] [--discard-numeric]
@@ -45,7 +46,7 @@ optional arguments:
   -v, --verbose
   -d, --debug
   --discard-numeric     Discard numeric features
-
+```
 Usage - Python API
 ==================
 The system consists of several independent components -
