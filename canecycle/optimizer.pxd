@@ -12,4 +12,5 @@ cdef class Optimizer(object):
     cdef np.ndarray n
     cdef LossFunction loss_function
     
-    cpdef np.ndarray[np.float_t, ndim=1] step(self, Item item, np.ndarray[np.float_t, ndim=1] weights)
+    cpdef np.ndarray[np.float_t, ndim=1] step(self,Item item,
+                                              np.ndarray[np.float_t, ndim=1] weights)

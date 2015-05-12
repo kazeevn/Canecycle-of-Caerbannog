@@ -77,7 +77,8 @@ cdef class Reader(Source):
             self.iterator = cache_reader.__iter__()
         elif write_cache:
             self.open_cache_writer = True
-            self.cache_writer = CacheWriter(self.get_feature_columns_count(), self.get_features_count())
+            self.cache_writer = CacheWriter(self.get_feature_columns_count(),
+                                            self.get_features_count())
             self.cache_writer.open(self.cache_file_name)
             def parse_and_cache(str line):
                 cdef Item item = self.parser.parse(line)
