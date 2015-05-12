@@ -94,6 +94,12 @@ cdef class Classifier(object):
             item.weight = self.weight_manager.get_weight(item.label, item.weight)
             self.weights = self.optimizer.step(item, self.weights)
             self.items_processed += 1
+        if self.display:
+            print ('%15d %15.6e %15.6e' % (
+                self.items_processed,
+                self.average_training_loss / self.items_processed,
+                item_loss))
+
     
     cdef void run_holdout_pass(self, Source reader) except *:
         cdef Item item
@@ -107,6 +113,11 @@ cdef class Classifier(object):
                         self.predict_proba_item(item)))
             self.holdout_loss += self.loss_function.get_loss(item, self.weights)
             self.holdout_items_processed += 1
+        if self.display:
+             print ('%15d %15.6e %15.6e' % (
+                 self.holdout_items_processed,
+                 self.holdout_loss / self.holdout_items_processed,
+                 self.predict_proba_item(item)))
     
     cpdef fit(self, Source reader, bool continue_fitting=False):
         if self.display:
