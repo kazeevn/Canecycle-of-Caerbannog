@@ -114,7 +114,7 @@ source.close()
 
 Advanced Example
 ----------------
-You can easily use any advanced algorithm in Python
+API alows easy usage any advanced algorithm for hyperparameters search
 for hyperparameters search. The following example is available in
 "scripts/param_search.py" and can be run as following:
 ```bash
