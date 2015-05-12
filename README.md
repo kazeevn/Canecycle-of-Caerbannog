@@ -51,8 +51,8 @@ optional arguments:
 Usage - Python API
 ==================
 The system consists of several independent components -
-if so desired you can, for example, supply your own optimizer
-or data source.
+if so desired you can, for example, supply your own optimization
+algorithm or data source.
 
 Classes descriptions
 --------------------
