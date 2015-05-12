@@ -114,8 +114,8 @@ source.close()
 
 Advanced Example
 ----------------
-API alows easy usage of any advanced algorithm for hyperparameters search
-for hyperparameters search. The following example is available in
+API alows easy usage of any advanced algorithm for hyperparameters search.
+The following example is available in
 "scripts/param_search.py" and can be run as following:
 ```bash
 python scripts/param_search.py canecycle/tests/train_except_git.can
