@@ -14,7 +14,7 @@ python setup.py build_ext --inplace
 nosetests .
 ```
 
-Usage - commad line
+Usage - command line
 ===================
 ```
 usage: ccc.py [-h] [-l LEARN] [-c CACHE] [-H HOLDOUT] [-b HASH_SIZE]
@@ -56,13 +56,13 @@ algorithm or data source.
 
 Classes descriptions
 --------------------
-1. Item. Represenation of object. Properties:
+1. Item. Representation of object. Properties:
    label - numpy.int, item label, -1 or +1
    indexes - numpy.ndarray, indexes of
       features with non-zero values. Usually you want
       them to be hashes.
    data - numpy.ndarray, feature values under item.indexes
-   weight - the weight. Subject to imterpretation by
+   weight - the weight. Subject to interpretation by
      optimization algorithms.
 2. Source. Something that feeds data into the system. Currently, two
    types are implemented: Reader to read SHAD-LSML and
@@ -70,7 +70,7 @@ Classes descriptions
    Must support:
    restart(int holdout) - restart the source to the beginning,
       specifies holdout to use
-   __iter__() - returnes iterator of Items
+   __iter__() - returns iterator of Items
 3. HashFunction - hash function to hash strings into uint64.
 4. LossFunction - loss function, currently logistic loss is
    implemented. Must support:
@@ -80,9 +80,9 @@ Classes descriptions
    get_gradient(item, weights)
 5. WeightManager - reweights items, so that rare classes get more
    weight
-6. Optimizer. Optimization algorithm implementaion.
-   Currenly FRTL-proximal is implemented. Must support:
-   step(item, weights) - feed Item into the algorith update weights
+6. Optimizer. Optimization algorithm implementation.
+   Currently FRTL-proximal is implemented. Must support:
+   step(item, weights) - feed Item into the algorithm update weights
 7. Classifier - Class that puts all above together.
 
 Example 
