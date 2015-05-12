@@ -74,10 +74,10 @@ def main():
         if args.discard_numeric:
             parser.error("Can't skip numerics in cache files")
         source = CacheReader(args.cache)
-        if args.hash_size and 2**args.hash_size != source.get_hash_size():
+        if args.hash_size and 2**args.hash_size != source.get_features_count():
             parser.error("Specified hash size differs from one in the"
                          " cache file")
-        hash_size = source.get_hash_size()
+        hash_size = source.get_features_count()
     else:
         parser.error("Must specify either --learn of --cache")
 

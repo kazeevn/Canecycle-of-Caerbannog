@@ -26,7 +26,7 @@ class TestReader(TestCase):
         reader.restart(3)
         cache_reader = CacheReader(cache_file)
         cache_reader.restart(3)
-        self.assertEqual(hash_size, cache_reader.get_hash_size())
+        self.assertEqual(hash_size, cache_reader.get_features_count())
         for read_item, cached_item in izip(reader, cache_reader):
             self.assertEqual(read_item.label, cached_item.label)
             self.assertEqual(read_item.weight, cached_item.weight)

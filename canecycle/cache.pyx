@@ -133,12 +133,9 @@ cdef class CacheReader(Source):
 
         self.file.close()
 
-    cpdef np.uint64_t get_hash_size(self):
-        """Returnes hash size used while building the cache"""
+    cpdef np.uint64_t get_features_count(self):
+        """Returnes feature space size (i. e. hash size)
+        used while building the cache"""
 
         return self.file.root.metadata_table[0]['hash_size']
 
-    cpdef np.uint64_t get_features_count(self):
-        """Returnes hash size used while building the cache"""
-
-        return self.get_hash_size()
