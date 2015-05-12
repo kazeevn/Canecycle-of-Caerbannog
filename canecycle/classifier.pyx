@@ -16,6 +16,7 @@ from canecycle.optimizer cimport Optimizer
 
 
 cdef class Classifier(object):
+    """Class that can fit/predict the data from source."""
     cdef WeightManager weight_manager
     cdef Optimizer optimizer
     cdef LossFunction loss_function
@@ -58,24 +59,29 @@ cdef class Classifier(object):
         self.use_cache=use_cache
     
     cdef np.int_t predict_item(self, Item item):
+        """Predicts label of one item."""
         return self.loss_function.get_decision(item, self.weights)
     
     cdef np.float_t predict_proba_item(self, Item item):
+        """Predicts label probability of one item."""
         return self.loss_function.get_loss(item, self.weights)
     
     def predict(self, Source reader):
+        """Predicts labels of data from the source."""
         cdef Item item
         reader.restart(0)
         for item in reader:
             yield self.predict_item(item)
     
     def predict_proba(self, Source reader):
+        """Predicts label probabilities of data from the source."""
         cdef Item item
         reader.restart(0)
         for item in reader:
             yield self.predict_proba_item(item)
 
     cdef void run_train_pass(self, Source reader):
+        """Passes through data from the source and optimizes weights."""
         cdef Item item
         for item in reader:
             item_loss = self.loss_function.get_loss(item, self.weights)
@@ -100,9 +106,9 @@ cdef class Classifier(object):
                 self.items_processed,
                 self.average_training_loss / self.items_processed,
                 item_loss))
-
     
     cdef void run_holdout_pass(self, Source reader) except *:
+        """Passes through data from the source and calculates holdout loss."""
         cdef Item item
         for item in reader:
             if self.holdout_items_processed == self.holdout_validation_index - 1:
@@ -121,6 +127,7 @@ cdef class Classifier(object):
                  self.predict_proba_item(item)))
     
     cpdef fit(self, Source reader, bool continue_fitting=False):
+        """Fits weights to data from the source"""
         if self.display:
             print '{:-^50}'.format(' TRAINING ')
             print ('%15s %15s %15s' % ('iteration', 'average', 'last'))
@@ -159,10 +166,13 @@ cdef class Classifier(object):
             self.holdout_loss /= self.holdout_items_processed
     
     cpdef list get_progressive_validation(self):
+        """Returns progressive valiadtion loss (if stored)."""
         return self.progressive_validation_loss
     
     cpdef np.float_t get_average_loss(self):
+        """Return average training loss."""
         return self.average_training_loss
     
     cpdef np.float_t get_holdout_loss(self):
+        """Return holdout loss."""
         return self.holdout_loss
