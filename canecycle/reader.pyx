@@ -65,6 +65,7 @@ cdef class Reader(Source):
         self.filename = filename
         self.cache_file_name = cache_file_name
         self.open_cache_writer = False
+        self.open_cache_reader = False
         
     def restart(self, np.int_t holdout, bool write_cache=False, bool use_cache=False):
         """Restarts the source to read from the beginning.
@@ -83,7 +84,11 @@ cdef class Reader(Source):
         if self.open_cache_writer:
             self.open_cache_writer = False
             self.cache_writer.close()
-            
+        
+        if self.open_cache_reader:
+            self.open_cache_reader = False
+            self.cache_reader.close()
+
         self.file = open(self.filename)
         for _ in xrange(self.skip):
             next(self.file)
@@ -93,9 +98,10 @@ cdef class Reader(Source):
             raise ValueError("Can't write and use cache at the same time")
             
         if use_cache:
-            cache_reader = CacheReader(self.cache_file_name)
-            cache_reader.restart(holdout)
-            self.iterator = cache_reader.__iter__()
+            self.cache_reader = CacheReader(self.cache_file_name)
+            self.cache_reader.restart(holdout)
+            self.open_cache_reader = True
+            self.iterator = self.cache_reader.__iter__()
         elif write_cache:
             self.open_cache_writer = True
             self.cache_writer = CacheWriter(self.get_feature_columns_count(),
@@ -120,6 +126,8 @@ cdef class Reader(Source):
 
         if self.open_cache_writer:
             self.cache_writer.close()
+        if self.open_cache_reader:
+            self.cache_reader.close()
         self.file.close()
 
     cpdef np.uint64_t get_feature_columns_count(self):

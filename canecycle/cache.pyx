@@ -75,9 +75,6 @@ cdef class CacheWriter(object):
 cdef class CacheReader(Source):
     """The class to read from .can file as a Source"""
     
-    cdef object table
-    cdef object file
-    
     def __cinit__(self, filename):
         """Arguments:
         filename - .can file to open
