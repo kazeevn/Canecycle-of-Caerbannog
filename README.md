@@ -1,7 +1,7 @@
 Installation
 ============
 Required python packages: 
-cython, numpy, spooky, tables
+cython, numpy, spooky, tables, numexpr
 
 ```bash
 sudo python setup.py install
