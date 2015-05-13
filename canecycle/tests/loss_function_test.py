@@ -8,7 +8,7 @@ from canecycle.loss_function import LossFunction
 class LossFunctionTest(unittest.TestCase):
     def test_predict_proba(self):
         item = Item()
-        item.indexes = np.array([0, 1], dtype=np.uint64)
+        item.indices = np.array([0, 1], dtype=np.uint64)
         item.data = np.array([1., 1.])
         weights = np.array([1., 1.])
         loss = LossFunction()
@@ -19,7 +19,7 @@ class LossFunctionTest(unittest.TestCase):
 
     def test_predict_loss(self):
         item = Item()
-        item.indexes = np.array([0, 1], dtype=np.uint64)
+        item.indices = np.array([0, 1], dtype=np.uint64)
         item.data = np.array([1., 1.])
         weights = np.array([1., 1.])
         item.label = 1
@@ -29,7 +29,7 @@ class LossFunctionTest(unittest.TestCase):
 
     def test_proba_underflow(self):
         item = Item()
-        item.indexes = np.array([0, 1], dtype=np.uint64)
+        item.indices = np.array([0, 1], dtype=np.uint64)
         item.data = np.array([-1e10, -1e10])
         weights = np.array([1., 1.])
         item.label = 1
@@ -41,7 +41,7 @@ class LossFunctionTest(unittest.TestCase):
 
     def test_proba_overflow(self):
         item = Item()
-        item.indexes = np.array([0, 1], dtype=np.uint64)
+        item.indices = np.array([0, 1], dtype=np.uint64)
         item.data = np.array([1e6, 1e6])
         weights = np.array([1., 1.])
         item.label = 0

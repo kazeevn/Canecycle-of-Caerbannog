@@ -33,7 +33,7 @@ class TestReader(TestCase):
             np.testing.assert_array_equal(
                 read_item.data, cached_item.data)
             np.testing.assert_array_equal(
-                read_item.indexes, cached_item.indexes)
+                read_item.indices, cached_item.indices)
 
         reader.restart(-3)
         cache_reader.restart(-3)
@@ -43,7 +43,7 @@ class TestReader(TestCase):
             np.testing.assert_array_equal(
                 read_item.data, cached_item.data)
             np.testing.assert_array_equal(
-                read_item.indexes, cached_item.indexes)
+                read_item.indices, cached_item.indices)
 
         reader.close()
         cache_reader.restart(-4)

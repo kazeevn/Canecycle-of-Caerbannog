@@ -29,7 +29,7 @@ class TestReader(unittest.TestCase):
         np.testing.assert_array_equal(
             item_one.data, item_two.data)
         np.testing.assert_array_equal(
-            item_one.indexes, item_two.indexes)
+            item_one.indices, item_two.indices)
 
             
     def test_holdout_count(self):

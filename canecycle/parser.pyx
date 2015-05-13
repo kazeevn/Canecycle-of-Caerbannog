@@ -87,14 +87,14 @@ cdef class Parser(object):
         cdef Item item
         cdef str readout
         cdef str column_name
-        cdef list indexes
+        cdef list indices
         cdef list data
         cdef np.uint64_t item_format
         cdef np.uint64_t hash
         cdef np.uint64_t index
         processed_line = line.rstrip().split(',')
         item = Item()
-        item.indexes = np.ndarray(self.feature_columns_count, dtype=np.uint64)
+        item.indices = np.ndarray(self.feature_columns_count, dtype=np.uint64)
         item.data = np.ndarray(self.feature_columns_count, dtype=np.float_)
         index = 0
         for item_format, readout, column_name, hash in \
@@ -104,18 +104,18 @@ cdef class Parser(object):
             if item_format == VALUETYPE_LABEL:
                 item.label = int(readout) * 2 - 1
             elif item_format == VALUETYPE_CATEGORICAL:
-                item.indexes[index] = self.hash_function.hash(column_name + readout)
+                item.indices[index] = self.hash_function.hash(column_name + readout)
                 item.data[index] = 1.
                 index += 1
             elif item_format == VALUETYPE_NUMERICAL:
                 # In __init__ we precalculate hashes for numeric values
-                item.indexes[index] = hash
+                item.indices[index] = hash
                 item.data[index] = float(readout)
                 index += 1
             elif item_format != VALUETYPE_SKIP:
                 raise ValueError("Invalid format %s" % item_format)
         item.data.resize(index)
-        item.indexes.resize(index)
+        item.indices.resize(index)
         return item
     
     cpdef np.uint64_t get_features_count(self):
