@@ -80,7 +80,8 @@ class TestReader(unittest.TestCase):
         raw_reader.restart(0)
         for read_item, cached_item in izip(raw_reader, cache_reader):
             self.compare_items(read_item, cached_item)
-            
+        cache_reader.close()
+        
         reader.restart(-4, use_cache=True)
         raw_reader.restart(-4)
         for read_item, cached_item in izip(raw_reader, reader):
